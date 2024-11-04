@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>短剧搜索</title>
+    <title>无限短剧搜索</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,11 +29,12 @@
         }
         .search-container {
             width: 100%;
-            max-width: 600px;
+            max-width: 400px;
             padding: 1.5rem;
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .search-form {
@@ -47,6 +48,7 @@
             border-radius: 0.25rem;
             background-color: transparent;
             color: white;
+            font-size: 1rem;
         }
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
@@ -177,13 +179,13 @@
 </head>
 <body>
     <header>
-        <h1>短剧搜索</h1>
+        <h1>无限短剧搜索</h1>
     </header>
 
     <main>
         <div class="search-container">
             <form id="search-form" class="search-form">
-                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧名称..." required>
+                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧、演员、导演..." required>
                 <button type="submit" class="search-button">搜索</button>
             </form>
         </div>
@@ -194,7 +196,8 @@
     </main>
 
     <footer>
-        <p>© 2023 短剧搜索. 保留所有权利.</p>
+        <p> 网站资源均来源网络，若有侵权联系删除。</p>
+        <p>© 2024 清风密藏. 保留所有权利.</p>
     </footer>
 
     <div id="popup" class="popup">

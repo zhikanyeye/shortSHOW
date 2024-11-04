@@ -3,21 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <title>短剧搜索</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 在这里添加CSS样式 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f1c40f;
+            color: white;
+            padding: 20px;
+        }
+        .search-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+        }
+        input[type="search"] {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px;
+        }
+        button {
+            background: #5cb85c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #ccc;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .results div {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #5cb85c;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
 <body>
     <div class="search-container">
-        <input type="text" id="searchBox" placeholder="输入短剧名称或主角名">
-        <button onclick="searchDramas()">搜索</button>
+        <input type="search" id="searchBox" placeholder="搜索短剧或演员...">
+        <button id="searchButton" onclick="handleSearch">
+            <span id="searchIcon">🔍</span>
+            <span id="loadingIcon" class="loader" style="display:none;"></span>
+        </button>
     </div>
     <div id="results" class="results">
         <!-- 搜索结果将在这里显示 -->
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // 模拟数据库
+        const shortDramas = [
+            { id: 1, title: "科技新世界", actor: "张三", link: "#drama1" },
+            { id: 2, title: "虚拟现实", actor: "李四", link: "#drama2" },
+            { id: 3, title: "人工智能", actor: "王五", link: "#drama3" },
+            { id: 4, title: "量子纠缠", actor: "赵六", link: "#drama4" },
+            { id: 5, title: "太空探索", actor: "钱七", link: "#drama5" },
+        ];
+
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const resultsContainer = document.getElementById('results');
+            const searchButton = document.getElementById('searchButton');
+            const searchIcon = document.getElementById('searchIcon');
+            const loadingIcon = document.getElementById('loadingIcon');
+
+            searchButton.disabled = true;
+            loadingIcon.style.display = 'inline-block';
+            searchIcon.style.display = 'none';
+
+            // 模拟搜索延迟
+            setTimeout(() => {
+                const results = shortDramas.filter(drama => 
+                    drama.title.toLowerCase().includes(searchTerm) ||
+                    drama.actor.toLowerCase().includes(searchTerm)
+                );
+                resultsContainer.innerHTML = ''; // 清空之前的结果
+                results.forEach(drama => {
+                    const resultElement = document.createElement('div');
+                    resultElement.innerHTML = `<h3>${drama.title}</h3><p>主演: ${drama.actor}</p><a href="${drama.link}">查看详情</a>`;
+                    resultsContainer.appendChild(resultElement);
+                });
+                searchButton.disabled = false;
+                loadingIcon.style.display = 'none';
+                searchIcon.style.display = 'inline-block';
+            }, 1500);
+        }
+    </script>
 </body>
 </html>
-<div class="contact-info">
-    <p>如果您有任何问题或需要帮助，请联系站长：</p>
-    <a href="mailto:your-email@example.com">your-email@example.com</a>
-</div>

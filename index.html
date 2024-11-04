@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>无限短剧搜索</title>
+    <title>短剧搜索</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,7 +29,7 @@
         }
         .search-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             padding: 1.5rem;
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
@@ -82,9 +82,12 @@
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        .result-info {
-            font-size: 0.875rem;
-            color: #cbd5e0;
+        .result-link {
+            color: #63b3ed;
+            text-decoration: none;
+        }
+        .result-link:hover {
+            text-decoration: underline;
         }
         footer {
             padding: 1rem;
@@ -174,13 +177,13 @@
 </head>
 <body>
     <header>
-        <h1>无限短剧搜索</h1>
+        <h1>短剧搜索</h1>
     </header>
 
     <main>
         <div class="search-container">
             <form id="search-form" class="search-form">
-                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧、演员、导演..." required>
+                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧名称..." required>
                 <button type="submit" class="search-button">搜索</button>
             </form>
         </div>
@@ -191,7 +194,7 @@
     </main>
 
     <footer>
-        <p>© 2024 清风密藏. 保留所有权利.</p>
+        <p>© 2023 短剧搜索. 保留所有权利.</p>
     </footer>
 
     <div id="popup" class="popup">
@@ -204,8 +207,14 @@
 
     <script>
         let dramas = [];
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const loading = document.getElementById('loading');
+        const popup = document.getElementById('popup');
+        const popupClose = document.getElementById('popup-close');
 
-        // 加载JSON数据
+        // 加载 JSON 数据
         fetch('dramas.json')
             .then(response => response.json())
             .then(data => {
@@ -214,55 +223,41 @@
             })
             .catch(error => console.error('加载数据出错:', error));
 
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const loading = document.getElementById('loading');
-        const popup = document.getElementById('popup');
-        const popupClose = document.getElementById('popup-close');
+        function search(searchTerm) {
+            return dramas.filter(drama => 
+                drama['短剧名称'].toLowerCase().includes(searchTerm)
+            );
+        }
+
+        function displayResults(results) {
+            if (results.length > 0) {
+                searchResults.innerHTML = '<h2>搜索结果</h2>';
+                results.forEach(drama => {
+                    searchResults.innerHTML += `
+                        <div class="result-item">
+                            <div class="result-title">${drama['短剧名称']}</div>
+                            <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
+                        </div>
+                    `;
+                });
+            } else {
+                popup.style.display = 'block';
+            }
+        }
 
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const searchTerm = searchInput.value.toLowerCase();
             
-            // 显示加载动画
             loading.style.display = 'block';
             searchResults.innerHTML = '';
 
-            // 模拟搜索延迟
-            setTimeout(() => {
-                const results = dramas.filter(drama => 
-                    drama.title.toLowerCase().includes(searchTerm) ||
-                    drama.actor.toLowerCase().includes(searchTerm) ||
-                    drama.director.toLowerCase().includes(searchTerm) ||
-                    drama.genre.toLowerCase().includes(searchTerm) ||
-                    drama.description.toLowerCase().includes(searchTerm)
-                );
-
-                // 隐藏加载动画
+            // 使用 requestAnimationFrame 来确保 UI 更新
+            requestAnimationFrame(() => {
+                const results = search(searchTerm);
                 loading.style.display = 'none';
-
-                // 显示搜索结果或弹窗
-                if (results.length > 0) {
-                    searchResults.innerHTML = '<h2>搜索结果</h2>';
-                    results.forEach(drama => {
-                        searchResults.innerHTML += `
-                            <div class="result-item">
-                                <div class="result-title">${drama.title}</div>
-                                <div class="result-info">
-                                    <p>主演: ${drama.actor}</p>
-                                    <p>导演: ${drama.director}</p>
-                                    <p>类型: ${drama.genre}</p>
-                                    <p>发布日期: ${drama.releaseDate}</p>
-                                    <p>简介: ${drama.description}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    popup.style.display = 'block';
-                }
-            }, 1000);
+                displayResults(results);
+            });
         });
 
         popupClose.addEventListener('click', function() {

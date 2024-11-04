@@ -82,7 +82,7 @@
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
-        .result-actor {
+        .result-info {
             font-size: 0.875rem;
             color: #cbd5e0;
         }
@@ -111,6 +111,65 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(26, 32, 44, 0.95);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            animation: popupAppear 0.5s ease-out;
+        }
+        @keyframes popupAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        .popup h2 {
+            margin-top: 0;
+            color: #f7fafc;
+        }
+        .popup p {
+            margin-bottom: 1.5rem;
+            color: #e2e8f0;
+        }
+        .popup-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #a0aec0;
+            cursor: pointer;
+        }
+        .popup-close:hover {
+            color: #f7fafc;
+        }
+        .qq-group {
+            background-color: #4a5568;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .qq-group:hover {
+            background-color: #2d3748;
+        }
     </style>
 </head>
 <body>
@@ -121,7 +180,7 @@
     <main>
         <div class="search-container">
             <form id="search-form" class="search-form">
-                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧或演员..." required>
+                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧、演员、导演..." required>
                 <button type="submit" class="search-button">搜索</button>
             </form>
         </div>
@@ -132,23 +191,35 @@
     </main>
 
     <footer>
-        <p>© 2023 清风密藏. 保留所有权利.</p>
+        <p>© 2024 清风密藏. 保留所有权利.</p>
     </footer>
 
+    <div id="popup" class="popup">
+        <button id="popup-close" class="popup-close">&times;</button>
+        <h2>暂无资源</h2>
+        <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
+        <p>请加入我们的QQ群联系群主添加：</p>
+        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：456464864</a>
+    </div>
+
     <script>
-        // 模拟数据库
-        const shortDramas = [
-            { id: 1, title: "科技新世界", actor: "张三", link: "#drama-1" },
-            { id: 2, title: "虚拟现实", actor: "李四", link: "#drama-2" },
-            { id: 3, title: "人工智能", actor: "王五", link: "#drama-3" },
-            { id: 4, title: "量子纠缠", actor: "赵六", link: "#drama-4" },
-            { id: 5, title: "太空探索", actor: "钱七", link: "#drama-5" },
-        ];
+        let dramas = [];
+
+        // 加载JSON数据
+        fetch('dramas.json')
+            .then(response => response.json())
+            .then(data => {
+                dramas = data;
+                console.log('数据加载完成');
+            })
+            .catch(error => console.error('加载数据出错:', error));
 
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
         const loading = document.getElementById('loading');
+        const popup = document.getElementById('popup');
+        const popupClose = document.getElementById('popup-close');
 
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -160,29 +231,42 @@
 
             // 模拟搜索延迟
             setTimeout(() => {
-                const results = shortDramas.filter(drama => 
+                const results = dramas.filter(drama => 
                     drama.title.toLowerCase().includes(searchTerm) ||
-                    drama.actor.toLowerCase().includes(searchTerm)
+                    drama.actor.toLowerCase().includes(searchTerm) ||
+                    drama.director.toLowerCase().includes(searchTerm) ||
+                    drama.genre.toLowerCase().includes(searchTerm) ||
+                    drama.description.toLowerCase().includes(searchTerm)
                 );
 
                 // 隐藏加载动画
                 loading.style.display = 'none';
 
-                // 显示搜索结果
+                // 显示搜索结果或弹窗
                 if (results.length > 0) {
                     searchResults.innerHTML = '<h2>搜索结果</h2>';
                     results.forEach(drama => {
                         searchResults.innerHTML += `
                             <div class="result-item">
                                 <div class="result-title">${drama.title}</div>
-                                <div class="result-actor">主演: ${drama.actor}</div>
+                                <div class="result-info">
+                                    <p>主演: ${drama.actor}</p>
+                                    <p>导演: ${drama.director}</p>
+                                    <p>类型: ${drama.genre}</p>
+                                    <p>发布日期: ${drama.releaseDate}</p>
+                                    <p>简介: ${drama.description}</p>
+                                </div>
                             </div>
                         `;
                     });
                 } else {
-                    searchResults.innerHTML = '<p>没有找到匹配的结果。</p>';
+                    popup.style.display = 'block';
                 }
-            }, 1500);
+            }, 1000);
+        });
+
+        popupClose.addEventListener('click', function() {
+            popup.style.display = 'none';
         });
     </script>
 </body>

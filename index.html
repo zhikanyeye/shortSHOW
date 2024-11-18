@@ -305,11 +305,14 @@
 
         function search(searchTerm) {
             return dramas.filter(drama => 
-                drama['短剧名称'].toLowerCase().includes(searchTerm)
+                drama['短剧名称'].toLowerCase().includes(searchTerm) ||
+                (drama['主演'] && drama['主演'].toLowerCase().includes(searchTerm)) ||
+                (drama['简介'] && drama['简介'].toLowerCase().includes(searchTerm))
             );
         }
 
         function displayResults(results) {
+            searchResults.innerHTML = ''; // Clear previous results
             if (results.length > 0) {
                 searchResults.innerHTML = '<h2>搜索结果</h2>';
                 results.forEach(drama => {

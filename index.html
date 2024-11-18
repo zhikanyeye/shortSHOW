@@ -16,8 +16,13 @@
             color: white;
         }
         header {
-            padding: 1rem;
+            padding: 3rem 1rem;
             text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0;
         }
         main {
             flex-grow: 1;
@@ -31,7 +36,7 @@
             width: 100%;
             max-width: 400px;
             padding: 1.5rem;
-            border-radius: 0.5rem;
+            border-radius: 1rem;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -43,10 +48,10 @@
         }
         .search-input {
             flex-grow: 1;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.25rem;
-            background-color: transparent;
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
         }
@@ -54,15 +59,17 @@
             color: rgba(255, 255, 255, 0.5);
         }
         .search-button {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border: none;
-            border-radius: 0.25rem;
-            background-color: #4a5568;
+            border-radius: 0.5rem;
+            background-color: #4299e1;
             color: white;
             cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
         .search-button:hover {
-            background-color: #2d3748;
+            background-color: #3182ce;
         }
         .loading-container {
             display: none;
@@ -78,55 +85,29 @@
             justify-content: center;
             align-items: center;
         }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #fff;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .dog-running {
+            width: 100px;
+            height: 100px;
+            background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23f9f9f9"/><circle cx="35" cy="40" r="5" fill="%23333"/><circle cx="65" cy="40" r="5" fill="%23333"/><path d="M40 60 Q50 70 60 60" stroke="%23333" stroke-width="3" fill="none"/><path d="M20 50 Q30 60 40 50 Q50 40 60 50 Q70 60 80 50" stroke="%23333" stroke-width="3" fill="none"/></svg>') 0 0 no-repeat;
+            animation: run 0.5s steps(4) infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes run {
+            0% { background-position: 0 0; }
+            100% { background-position: -400px 0; }
         }
         .results-container {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+            margin-top: 2rem;
             width: 100%;
-            height: 100%;
-            background-color: rgba(26, 32, 44, 0.95);
-            overflow-y: auto;
-            z-index: 900;
-        }
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: rgba(0, 0, 0, 0.2);
-        }
-        .close-results {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .results-list {
-            padding: 1rem;
+            max-width: 600px;
         }
         .result-item {
             margin-bottom: 1rem;
             padding: 1rem;
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
-            transition: background-color 0.3s;
-        }
-        .result-item:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         .result-title {
             font-weight: bold;
@@ -159,17 +140,6 @@
             max-width: 90%;
             width: 400px;
             text-align: center;
-            animation: popupAppear 0.5s ease-out;
-        }
-        @keyframes popupAppear {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -60%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
         }
         .popup h2 {
             margin-top: 0;
@@ -204,6 +174,67 @@
         .qq-group:hover {
             background-color: #2d3748;
         }
+        #contactButton {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            color: #2d3748;
+            border: 2px solid #ffd700;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 0.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -218,19 +249,18 @@
                 <button type="submit" class="search-button">搜索</button>
             </form>
         </div>
+
+        <div id="loading" class="loading-container">
+            <div class="dog-running"></div>
+        </div>
+
+        <div id="search-results" class="results-container"></div>
     </main>
 
-    <div class="loading-container" id="loading-container">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <div class="results-container" id="results-container">
-        <div class="results-header">
-            <h2>搜索结果</h2>
-            <button class="close-results" id="close-results">&times;</button>
-        </div>
-        <div class="results-list" id="results-list"></div>
-    </div>
+    <footer>
+        <p>© 2024 清风密藏. 保留所有权利.</p>
+        <p>网站资源均来源网络，若有侵权联系删除。</p>
+    </footer>
 
     <div id="popup" class="popup">
         <button id="popup-close" class="popup-close">&times;</button>
@@ -240,21 +270,29 @@
         <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
     </div>
 
-    <footer>
-    <p> 网站资源均来源网络，若有侵权联系删除。</p>         
-    <p>© 2024 清风密藏. 保留所有权利.</p>
-    </footer>
+    <button id="contactButton">联系站长</button>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>联系信息</h2>
+            <p>站长邮箱: qingfeng@zhikan.000.pe</p>
+            <p>由智看'清风'友情提供付费短剧免费观看。</p>
+            <p>求剧求资源，请关注公众号智看科技，联系作者 😍</p>
+        </div>
+    </div>
 
     <script>
         let dramas = [];
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-        const loadingContainer = document.getElementById('loading-container');
-        const resultsContainer = document.getElementById('results-container');
-        const resultsList = document.getElementById('results-list');
-        const closeResults = document.getElementById('close-results');
+        const searchResults = document.getElementById('search-results');
+        const loading = document.getElementById('loading');
         const popup = document.getElementById('popup');
         const popupClose = document.getElementById('popup-close');
+        const contactButton = document.getElementById('contactButton');
+        const modal = document.getElementById('myModal');
+        const span = document.getElementsByClassName('close')[0];
 
         // 加载 JSON 数据
         fetch('dramas.json')
@@ -272,17 +310,17 @@
         }
 
         function displayResults(results) {
-            resultsList.innerHTML = '';
             if (results.length > 0) {
+                searchResults.innerHTML = '<h2>搜索结果</h2>';
                 results.forEach(drama => {
-                    resultsList.innerHTML += `
+                    searchResults.innerHTML += `
                         <div class="result-item">
                             <div class="result-title">${drama['短剧名称']}</div>
                             <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
                         </div>
                     `;
                 });
-                resultsContainer.style.display = 'block';
+                searchResults.style.display = 'block';
             } else {
                 popup.style.display = 'block';
             }
@@ -292,22 +330,34 @@
             e.preventDefault();
             const searchTerm = searchInput.value.toLowerCase();
             
-            loadingContainer.style.display = 'flex';
-            
+            loading.style.display = 'flex';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+
             setTimeout(() => {
                 const results = search(searchTerm);
-                loadingContainer.style.display = 'none';
+                loading.style.display = 'none';
                 displayResults(results);
-            }, 1500); // 模拟搜索延迟
-        });
-
-        closeResults.addEventListener('click', function() {
-            resultsContainer.style.display = 'none';
+            }, 1500);
         });
 
         popupClose.addEventListener('click', function() {
             popup.style.display = 'none';
         });
+
+        contactButton.onclick = function() {
+            modal.style.display = 'block';
+        }
+
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

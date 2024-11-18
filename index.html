@@ -64,17 +64,65 @@
         .search-button:hover {
             background-color: #2d3748;
         }
-        .search-results {
-            margin-top: 2rem;
+        .loading-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 600px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #fff;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .results-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95);
+            overflow-y: auto;
+            z-index: 900;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .close-results {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .results-list {
+            padding: 1rem;
         }
         .result-item {
             margin-bottom: 1rem;
             padding: 1rem;
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             transition: background-color 0.3s;
         }
         .result-item:hover {
@@ -96,25 +144,6 @@
             text-align: center;
             font-size: 0.875rem;
             color: #a0aec0;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 1rem;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading::after {
-            content: "";
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #cbd5e0;
-            border-top: 2px solid #4a5568;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
         }
         .popup {
             display: none;
@@ -185,35 +214,45 @@
     <main>
         <div class="search-container">
             <form id="search-form" class="search-form">
-                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧、演员、导演..." required>
+                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧名称..." required>
                 <button type="submit" class="search-button">搜索</button>
             </form>
         </div>
-
-        <div id="loading" class="loading"></div>
-
-        <div id="search-results" class="search-results"></div>
     </main>
 
-    <footer>
-        <p> 网站资源均来源网络，若有侵权联系删除。</p>
-        <p>© 2024 清风密藏. 保留所有权利.</p>
-    </footer>
+    <div class="loading-container" id="loading-container">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="results-container" id="results-container">
+        <div class="results-header">
+            <h2>搜索结果</h2>
+            <button class="close-results" id="close-results">&times;</button>
+        </div>
+        <div class="results-list" id="results-list"></div>
+    </div>
 
     <div id="popup" class="popup">
         <button id="popup-close" class="popup-close">&times;</button>
         <h2>暂无资源</h2>
         <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
         <p>请加入我们的QQ群联系群主添加：</p>
-        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：456464864</a>
+        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
     </div>
+
+    <footer>
+    <p> 网站资源均来源网络，若有侵权联系删除。</p>         
+    <p>© 2024 清风密藏. 保留所有权利.</p>
+    </footer>
 
     <script>
         let dramas = [];
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const loading = document.getElementById('loading');
+        const loadingContainer = document.getElementById('loading-container');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsList = document.getElementById('results-list');
+        const closeResults = document.getElementById('close-results');
         const popup = document.getElementById('popup');
         const popupClose = document.getElementById('popup-close');
 
@@ -233,16 +272,17 @@
         }
 
         function displayResults(results) {
+            resultsList.innerHTML = '';
             if (results.length > 0) {
-                searchResults.innerHTML = '<h2>搜索结果</h2>';
                 results.forEach(drama => {
-                    searchResults.innerHTML += `
+                    resultsList.innerHTML += `
                         <div class="result-item">
                             <div class="result-title">${drama['短剧名称']}</div>
                             <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
                         </div>
                     `;
                 });
+                resultsContainer.style.display = 'block';
             } else {
                 popup.style.display = 'block';
             }
@@ -252,15 +292,17 @@
             e.preventDefault();
             const searchTerm = searchInput.value.toLowerCase();
             
-            loading.style.display = 'block';
-            searchResults.innerHTML = '';
-
-            // 使用 requestAnimationFrame 来确保 UI 更新
-            requestAnimationFrame(() => {
+            loadingContainer.style.display = 'flex';
+            
+            setTimeout(() => {
                 const results = search(searchTerm);
-                loading.style.display = 'none';
+                loadingContainer.style.display = 'none';
                 displayResults(results);
-            });
+            }, 1500); // 模拟搜索延迟
+        });
+
+        closeResults.addEventListener('click', function() {
+            resultsContainer.style.display = 'none';
         });
 
         popupClose.addEventListener('click', function() {

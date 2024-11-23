@@ -334,14 +334,13 @@
             const searchTerm = searchInput.value.toLowerCase();
             
             loading.style.display = 'flex';
-            searchResults.innerHTML = '';
-            searchResults.style.display = 'none';
+            searchResults.style.display = 'none'; // Hide results before loading
 
             setTimeout(() => {
                 const results = search(searchTerm);
                 loading.style.display = 'none';
                 displayResults(results);
-            }, 1500);
+            }, 1500); // Simulate a delay for the search
         });
 
         popupClose.addEventListener('click', function() {

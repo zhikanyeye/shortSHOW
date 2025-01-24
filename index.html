@@ -32,6 +32,12 @@
             animation: gradientBG 15s ease infinite;
             color: white;
             overflow-x: hidden;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         @keyframes gradientBG {
@@ -103,7 +109,6 @@
             border-color: #4299e1;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
         }
-
         .search-button {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -125,6 +130,7 @@
         .search-button:active {
             transform: translateY(0);
         }
+
         .loading-container {
             display: none;
             position: fixed;
@@ -165,16 +171,7 @@
             animation: rainbow-glow 2s linear infinite;
         }
 
-        @keyframes rainbow-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes rainbow-glow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-
+        /* 优化后的模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -186,13 +183,18 @@
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             z-index: 1001;
-            transition: opacity 0.3s ease;
             opacity: 1;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 0;
         }
 
         .modal-content {
             background-color: rgba(26, 32, 44, 0.95);
-            margin: 5% auto;
             padding: 2rem;
             border: 1px solid #4a5568;
             width: 90%;
@@ -200,10 +202,10 @@
             border-radius: 1rem;
             position: relative;
             color: white;
-            max-height: 80vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            margin: auto;
             animation: modalSlideIn 0.3s ease;
+            touch-action: pan-y pinch-zoom;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         @keyframes modalSlideIn {
@@ -217,17 +219,58 @@
             }
         }
 
+        .modal h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
         .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
             color: #aaa;
-            float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
             transition: color 0.3s ease;
+            padding: 0 10px;
+            line-height: 1;
         }
 
         .close:hover {
             color: #fff;
+        }
+
+        #contactButton {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: #2d3748;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease, opacity 1s ease;
+            opacity: 1;
+        }
+
+        #contactButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+        @keyframes rainbow-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rainbow-glow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
         }
 
         .result-item {
@@ -253,6 +296,7 @@
             margin-bottom: 0.5rem;
             font-size: 1.1rem;
             line-height: 1.4;
+            text-align: center;
         }
 
         .result-link {
@@ -272,32 +316,12 @@
             background-color: rgba(99, 179, 237, 0.2);
             transform: translateY(-1px);
         }
+
         footer {
             padding: 1rem;
             text-align: center;
             font-size: 0.875rem;
             color: #a0aec0;
-        }
-
-        #contactButton {
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            color: #2d3748;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        #contactButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
         }
 
         .qq-group {
@@ -338,35 +362,51 @@
             .search-button {
                 width: 100%;
             }
-             .modal-content {
-        margin: 0;
-        padding: 1rem;
-        width: 100%;
-        height: 100%;
-        max-height: 100vh;
-        border-radius: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
 
-    #searchResultsList {
-        padding-bottom: 2rem;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        max-height: calc(100vh - 120px);
-    }
+            .modal {
+                padding: 0;
+            }
 
-    .result-item {
-        margin-bottom: 1rem;
-    }
+            .modal-content {
+                margin: 0;
+                width: 100%;
+                min-height: 100vh;
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #searchResultsList {
+                flex: 1;
+                padding-bottom: 4rem;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
             .rainbow-loader {
                 width: 60px;
                 height: 60px;
+            }
+
+            .close {
+                position: fixed;
+                right: 1rem;
+                top: 1rem;
+            }
+        }
+
+        /* 触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .modal {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .modal-content {
+                touch-action: pan-y pinch-zoom;
+            }
+            
+            #searchResultsList {
+                touch-action: pan-y pinch-zoom;
             }
         }
 
@@ -388,16 +428,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.4);
         }
-
-        /* 防复制样式 */
-        body {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
     </style>
 </head>
 <body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
@@ -417,6 +447,7 @@
             <div class="rainbow-loader"></div>
         </div>
     </main>
+
     <!-- 搜索结果模态框 -->
     <div id="searchResultsModal" class="modal">
         <div class="modal-content">
@@ -431,9 +462,11 @@
         <div class="modal-content">
             <span class="close" id="noResultsClose">&times;</span>
             <h2>暂无资源</h2>
-            <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
-            <p>请加入我们的QQ群联系群主添加：</p>
-            <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+            <p style="text-align: center; margin-bottom: 1rem;">很抱歉，我们目前没有您搜索的短剧资源。</p>
+            <p style="text-align: center; margin-bottom: 1rem;">请加入我们的QQ群联系群主添加：</p>
+            <div style="text-align: center;">
+                <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+            </div>
         </div>
     </div>
 
@@ -442,9 +475,11 @@
         <div class="modal-content">
             <span class="close" id="contactClose">&times;</span>
             <h2>联系信息</h2>
-            <p>站长邮箱: qingfeng@zhikan.000.pe</p>
-            <p>由览胜'清风'友情提供付费短剧免费观看。</p>
-            <p>求剧求资源，请关注公众号览胜科语，联系作者 😍</p>
+            <div style="text-align: center;">
+                <p style="margin-bottom: 1rem;">站长邮箱: qingfeng@zhikan.000.pe</p>
+                <p style="margin-bottom: 1rem;">由览胜'清风'友情提供付费短剧免费观看。</p>
+                <p>求剧求资源，请关注公众号览胜科语，联系作者 😍</p>
+            </div>
         </div>
     </div>
 
@@ -456,35 +491,6 @@
     </footer>
 
     <script>
-        // 控制台警告
-        console.log(
-            '%c警告！',
-            'color: red; font-size: 30px; font-weight: bold;'
-        );
-        console.log(
-            '%c这是一个浏览器功能，仅供开发者使用。如果有人告诉你在这里粘贴代码可以破解或获得什么特殊功能，那是在骗你。',
-            'color: red; font-size: 16px;'
-        );
-
-        // 禁用控制台
-        (function() {
-            try {
-                var _0x123f = ['log', 'warn', 'info', 'error', 'exception', 'table', 'trace'];
-                var _console = {};
-                for(var i = 0; i < _0x123f.length; i++) {
-                    _console[_0x123f[i]] = function(){};
-                }
-                Object.defineProperty(window, 'console', {
-                    get: function() {
-                        if (false) {
-                            return _console;
-                        }
-                        throw new Error('请勿使用控制台！');
-                    }
-                });
-            } catch(err) {}
-        })();
-
         // 基础变量初始化
         let dramas = [];
         const searchForm = document.getElementById('search-form');
@@ -494,6 +500,29 @@
         const noResultsModal = document.getElementById('noResultsModal');
         const contactModal = document.getElementById('contactModal');
         const contactButton = document.getElementById('contactButton');
+
+        // 联系按钮渐隐功能
+        function hideContactButton() {
+            const contactButton = document.getElementById('contactButton');
+            contactButton.style.opacity = '0';
+            // 当完全透明后隐藏元素，防止遮挡点击
+            setTimeout(() => {
+                contactButton.style.visibility = 'hidden';
+            }, 1000);
+        }
+
+        // 页面加载完成后一分钟执行
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(hideContactButton, 60000); // 60秒后隐藏
+        });
+
+        // 页面刷新时重置按钮状态
+        window.onload = () => {
+            const contactButton = document.getElementById('contactButton');
+            contactButton.style.opacity = '1';
+            contactButton.style.visibility = 'visible';
+            setTimeout(hideContactButton, 60000);
+        };
 
         // 加密函数
         function encrypt(text) {
@@ -505,48 +534,37 @@
             return decodeURIComponent(atob(text.split('').reverse().join('')));
         }
 
-        // 防止调试
-        setInterval(function() {
-            debugger;
-        }, 100);
-
-        // 禁用开发者工具快捷键
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode === 123 || // F12
-                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
-                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
-                (e.ctrlKey && e.keyCode === 85)) { // Ctrl+U
-                e.preventDefault();
-                return false;
-            }
-        });
+        // 模态框管理
+        function closeModal(modal) {
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modal.style.opacity = '1';
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
 
         // 关闭按钮事件监听
         document.querySelectorAll('.close').forEach(closeBtn => {
-            closeBtn.onclick = function() {
+            closeBtn.onclick = function(e) {
+                e.preventDefault();
                 const modal = this.closest('.modal');
-                modal.style.opacity = '0';
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                    modal.style.opacity = '1';
-                }, 300);
+                closeModal(modal);
             }
         });
 
         // 点击模态框外部关闭
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
-                event.target.style.opacity = '0';
-                setTimeout(() => {
-                    event.target.style.display = 'none';
-                    event.target.style.opacity = '1';
-                }, 300);
+                event.preventDefault();
+                closeModal(event.target);
             }
         };
 
         // 联系按钮点击事件
         contactButton.onclick = function() {
             contactModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
         };
 
         // 加载并加密数据
@@ -600,6 +618,7 @@
             });
 
             searchResultsModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
         }
 
         // 搜索表单提交事件
@@ -617,6 +636,7 @@
                     displayResults(results);
                 } else {
                     noResultsModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
                 }
             }, 1500);
         });
@@ -637,18 +657,6 @@
             }
             lastTouchEnd = now;
         }, false);
-
-        // 额外的安全措施
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-
-        window.addEventListener('devtoolschange', function(e) {
-            if(e.detail.open) {
-                document.body.innerHTML = '请勿使用开发者工具！';
-            }
-        });
     </script>
 </body>
 </html>

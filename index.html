@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>无限短剧搜索</title>
+    <!-- 禁用缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
-        /* 保持原有的基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -13,8 +27,17 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(to bottom right, #1a202c, #2d3748);
+            background: linear-gradient(-45deg, #1a202c, #2d3748, #234e52, #2c5282);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             color: white;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         header {
@@ -35,6 +58,12 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .search-container {
@@ -46,6 +75,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-out 0.3s backwards;
         }
 
         .search-form {
@@ -61,10 +91,17 @@
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
         }
 
         .search-button {
@@ -75,13 +112,19 @@
             color: white;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            transform: translateY(0);
         }
 
         .search-button:hover {
             background-color: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
         }
 
+        .search-button:active {
+            transform: translateY(0);
+        }
         .loading-container {
             display: none;
             position: fixed;
@@ -103,6 +146,7 @@
             border-radius: 50%;
             position: relative;
             animation: rainbow-spin 1.5s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
         }
 
         .rainbow-loader::before {
@@ -140,7 +184,10 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             z-index: 1001;
+            transition: opacity 0.3s ease;
+            opacity: 1;
         }
 
         .modal-content {
@@ -155,6 +202,19 @@
             color: white;
             max-height: 80vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .close {
@@ -163,6 +223,7 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            transition: color 0.3s ease;
         }
 
         .close:hover {
@@ -174,16 +235,24 @@
             padding: 1rem;
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            word-break: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .result-item:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .result-title {
             font-weight: bold;
             margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
         }
 
         .result-link {
@@ -193,13 +262,16 @@
             padding: 0.5rem 1rem;
             background-color: rgba(99, 179, 237, 0.1);
             border-radius: 0.25rem;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
         }
 
         .result-link:hover {
             background-color: rgba(99, 179, 237, 0.2);
+            transform: translateY(-1px);
         }
-
         footer {
             padding: 1rem;
             text-align: center;
@@ -212,20 +284,20 @@
             bottom: 1rem;
             left: 1rem;
             padding: 0.5rem 1rem;
-            background-color: white;
+            background: linear-gradient(45deg, #ffd700, #ffa500);
             color: #2d3748;
-            border: 2px solid #ffd700;
+            border: none;
             border-radius: 0.25rem;
             cursor: pointer;
             font-weight: bold;
             z-index: 100;
-            animation: pulse 2s infinite;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        #contactButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
         }
 
         .qq-group {
@@ -235,11 +307,13 @@
             border-radius: 0.25rem;
             text-decoration: none;
             display: inline-block;
+            transition: all 0.3s ease;
             margin-top: 1rem;
         }
 
         .qq-group:hover {
             background-color: #2d3748;
+            transform: translateY(-1px);
         }
 
         /* 移动端适配 */
@@ -258,7 +332,7 @@
 
             .search-form {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 0.8rem;
             }
 
             .search-button {
@@ -266,48 +340,51 @@
             }
 
             .modal-content {
-                margin: 10% auto;
-                padding: 1.5rem;
-                width: 95%;
-            }
-
-            .result-item {
-                padding: 0.75rem;
-            }
-
-            .close {
-                padding: 0.5rem;
-            }
-
-            #contactButton {
-                padding: 0.75rem 1rem;
+                margin: 0;
+                padding: 1rem;
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
             }
 
             .rainbow-loader {
                 width: 60px;
                 height: 60px;
             }
-
-            .rainbow-loader::before {
-                border-width: 6px;
-            }
         }
 
-        /* 平板适配 */
-        @media screen and (min-width: 769px) and (max-width: 1024px) {
-            .search-container {
-                max-width: 500px;
-            }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
 
-            .modal-content {
-                max-width: 700px;
-            }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 防复制样式 */
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
-<!-- HTML部分保持不变 -->
-</head>
-<body>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
     <header>
         <h1>无限短剧搜索</h1>
     </header>
@@ -324,7 +401,6 @@
             <div class="rainbow-loader"></div>
         </div>
     </main>
-
     <!-- 搜索结果模态框 -->
     <div id="searchResultsModal" class="modal">
         <div class="modal-content">
@@ -364,6 +440,36 @@
     </footer>
 
     <script>
+        // 控制台警告
+        console.log(
+            '%c警告！',
+            'color: red; font-size: 30px; font-weight: bold;'
+        );
+        console.log(
+            '%c这是一个浏览器功能，仅供开发者使用。如果有人告诉你在这里粘贴代码可以破解或获得什么特殊功能，那是在骗你。',
+            'color: red; font-size: 16px;'
+        );
+
+        // 禁用控制台
+        (function() {
+            try {
+                var _0x123f = ['log', 'warn', 'info', 'error', 'exception', 'table', 'trace'];
+                var _console = {};
+                for(var i = 0; i < _0x123f.length; i++) {
+                    _console[_0x123f[i]] = function(){};
+                }
+                Object.defineProperty(window, 'console', {
+                    get: function() {
+                        if (false) {
+                            return _console;
+                        }
+                        throw new Error('请勿使用控制台！');
+                    }
+                });
+            } catch(err) {}
+        })();
+
+        // 基础变量初始化
         let dramas = [];
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
@@ -373,17 +479,52 @@
         const contactModal = document.getElementById('contactModal');
         const contactButton = document.getElementById('contactButton');
 
+        // 加密函数
+        function encrypt(text) {
+            return btoa(encodeURIComponent(text)).split('').reverse().join('');
+        }
+
+        // 解密函数
+        function decrypt(text) {
+            return decodeURIComponent(atob(text.split('').reverse().join('')));
+        }
+
+        // 防止调试
+        setInterval(function() {
+            debugger;
+        }, 100);
+
+        // 禁用开发者工具快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+                (e.ctrlKey && e.keyCode === 85)) { // Ctrl+U
+                e.preventDefault();
+                return false;
+            }
+        });
+
         // 关闭按钮事件监听
         document.querySelectorAll('.close').forEach(closeBtn => {
             closeBtn.onclick = function() {
-                this.closest('.modal').style.display = 'none';
+                const modal = this.closest('.modal');
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.style.opacity = '1';
+                }, 300);
             }
         });
 
         // 点击模态框外部关闭
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+                event.target.style.opacity = '0';
+                setTimeout(() => {
+                    event.target.style.display = 'none';
+                    event.target.style.opacity = '1';
+                }, 300);
             }
         };
 
@@ -392,22 +533,35 @@
             contactModal.style.display = 'block';
         };
 
-        // 加载 JSON 数据
+        // 加载并加密数据
         fetch('dramas.json')
             .then(response => response.json())
             .then(data => {
-                dramas = data;
+                dramas = data.map(item => ({
+                    '短剧名称': encrypt(item['短剧名称']),
+                    '短剧链接': encrypt(item['短剧链接']),
+                    '主演': item['主演'] ? encrypt(item['主演']) : '',
+                    '简介': item['简介'] ? encrypt(item['简介']) : ''
+                }));
                 console.log('数据加载完成');
             })
             .catch(error => console.error('加载数据出错:', error));
 
         // 搜索函数
         function search(searchTerm) {
-            return dramas.filter(drama => 
-                drama['短剧名称'].toLowerCase().includes(searchTerm) ||
-                (drama['主演'] && drama['主演'].toLowerCase().includes(searchTerm)) ||
-                (drama['简介'] && drama['简介'].toLowerCase().includes(searchTerm))
-            );
+            return dramas.filter(drama => {
+                try {
+                    const name = decrypt(drama['短剧名称']).toLowerCase();
+                    const actor = drama['主演'] ? decrypt(drama['主演']).toLowerCase() : '';
+                    const desc = drama['简介'] ? decrypt(drama['简介']).toLowerCase() : '';
+                    
+                    return name.includes(searchTerm) || 
+                           actor.includes(searchTerm) || 
+                           desc.includes(searchTerm);
+                } catch(e) {
+                    return false;
+                }
+            });
         }
 
         // 显示搜索结果
@@ -416,13 +570,17 @@
             searchResultsList.innerHTML = '';
 
             results.forEach(drama => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
-                resultItem.innerHTML = `
-                    <div class="result-title">${drama['短剧名称']}</div>
-                    <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
-                `;
-                searchResultsList.appendChild(resultItem);
+                try {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerHTML = `
+                        <div class="result-title">${decrypt(drama['短剧名称'])}</div>
+                        <a href="${decrypt(drama['短剧链接'])}" class="result-link" target="_blank">观看链接</a>
+                    `;
+                    searchResultsList.appendChild(resultItem);
+                } catch(e) {
+                    console.error('显示结果出错');
+                }
             });
 
             searchResultsModal.style.display = 'block';
@@ -463,5 +621,18 @@
             }
             lastTouchEnd = now;
         }, false);
+
+        // 额外的安全措施
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        window.addEventListener('devtoolschange', function(e) {
+            if(e.detail.open) {
+                document.body.innerHTML = '请勿使用开发者工具！';
+            }
+        });
     </script>
 </body>
+</html>

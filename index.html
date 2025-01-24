@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>无限短剧搜索</title>
-    <!-- 禁用缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -71,7 +70,6 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .search-container {
             width: 100%;
             max-width: 400px;
@@ -109,6 +107,7 @@
             border-color: #4299e1;
             box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
         }
+
         .search-button {
             padding: 0.75rem 1.5rem;
             border: none;
@@ -171,7 +170,16 @@
             animation: rainbow-glow 2s linear infinite;
         }
 
-        /* 优化后的模态框样式 */
+        @keyframes rainbow-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes rainbow-glow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        /* 修复后的模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -187,9 +195,12 @@
             transition: opacity 0.3s ease;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+        }
+
+        .modal.active {
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             padding: 20px 0;
         }
 
@@ -263,15 +274,6 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
         }
-        @keyframes rainbow-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes rainbow-glow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
 
         .result-item {
             margin-bottom: 1rem;
@@ -285,7 +287,6 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
-
         .result-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -363,24 +364,10 @@
                 width: 100%;
             }
 
-            .modal {
-                padding: 0;
-            }
-
             .modal-content {
-                margin: 0;
-                width: 100%;
-                min-height: 100vh;
-                border-radius: 0;
-                display: flex;
-                flex-direction: column;
-            }
-
-            #searchResultsList {
-                flex: 1;
-                padding-bottom: 4rem;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
+                width: 95%;
+                margin: 10px;
+                padding: 1.5rem;
             }
 
             .rainbow-loader {
@@ -389,9 +376,8 @@
             }
 
             .close {
-                position: fixed;
-                right: 1rem;
-                top: 1rem;
+                right: 0.5rem;
+                top: 0.5rem;
             }
         }
 
@@ -489,174 +475,174 @@
         <p>© 2025 清风密藏 保留所有权利.</p>
         <p>网站资源均来源网络，若有侵权联系删除。</p>
     </footer>
-
     <script>
-        // 基础变量初始化
-        let dramas = [];
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
-        const loading = document.getElementById('loading');
-        const searchResultsModal = document.getElementById('searchResultsModal');
-        const noResultsModal = document.getElementById('noResultsModal');
-        const contactModal = document.getElementById('contactModal');
-        const contactButton = document.getElementById('contactButton');
+    // 基础变量初始化
+    let dramas = [];
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    const loading = document.getElementById('loading');
+    const searchResultsModal = document.getElementById('searchResultsModal');
+    const noResultsModal = document.getElementById('noResultsModal');
+    const contactModal = document.getElementById('contactModal');
+    const contactButton = document.getElementById('contactButton');
 
-        // 联系按钮渐隐功能
-        function hideContactButton() {
-            const contactButton = document.getElementById('contactButton');
-            contactButton.style.opacity = '0';
-            // 当完全透明后隐藏元素，防止遮挡点击
-            setTimeout(() => {
-                contactButton.style.visibility = 'hidden';
-            }, 1000);
-        }
+    // 优化后的模态框显示函数
+    function showModal(modal) {
+        modal.classList.add('active');
+        // 设置模态框内容区域最大高度
+        const modalContent = modal.querySelector('.modal-content');
+        const windowHeight = window.innerHeight;
+        modalContent.style.maxHeight = `${windowHeight * 0.9}px`; // 设置为窗口高度的90%
+        modalContent.style.overflowY = 'auto';
+        document.body.style.overflow = 'hidden';
+    }
 
-        // 页面加载完成后一分钟执行
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(hideContactButton, 60000); // 60秒后隐藏
-        });
+    // 优化后的模态框关闭函数
+    function closeModal(modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 
-        // 页面刷新时重置按钮状态
-        window.onload = () => {
-            const contactButton = document.getElementById('contactButton');
-            contactButton.style.opacity = '1';
-            contactButton.style.visibility = 'visible';
-            setTimeout(hideContactButton, 60000);
-        };
+    // 联系按钮渐隐功能
+    function hideContactButton() {
+        contactButton.style.opacity = '0';
+        setTimeout(() => {
+            contactButton.style.visibility = 'hidden';
+        }, 1000);
+    }
 
-        // 加密函数
-        function encrypt(text) {
-            return btoa(encodeURIComponent(text)).split('').reverse().join('');
-        }
+    // 页面加载完成后一分钟执行渐隐
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(hideContactButton, 60000);
+    });
 
-        // 解密函数
-        function decrypt(text) {
-            return decodeURIComponent(atob(text.split('').reverse().join('')));
-        }
+    // 页面刷新时重置按钮状态
+    window.onload = () => {
+        contactButton.style.opacity = '1';
+        contactButton.style.visibility = 'visible';
+        setTimeout(hideContactButton, 60000);
+    };
 
-        // 模态框管理
-        function closeModal(modal) {
-            modal.style.opacity = '0';
-            setTimeout(() => {
-                modal.style.display = 'none';
-                modal.style.opacity = '1';
-                document.body.style.overflow = 'auto';
-            }, 300);
-        }
+    // 加密函数
+    function encrypt(text) {
+        return btoa(encodeURIComponent(text)).split('').reverse().join('');
+    }
 
-        // 关闭按钮事件监听
-        document.querySelectorAll('.close').forEach(closeBtn => {
-            closeBtn.onclick = function(e) {
-                e.preventDefault();
-                const modal = this.closest('.modal');
-                closeModal(modal);
-            }
-        });
+    // 解密函数
+    function decrypt(text) {
+        return decodeURIComponent(atob(text.split('').reverse().join('')));
+    }
 
-        // 点击模态框外部关闭
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.preventDefault();
-                closeModal(event.target);
-            }
-        };
-
-        // 联系按钮点击事件
-        contactButton.onclick = function() {
-            contactModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        };
-
-        // 加载并加密数据
-        fetch('dramas.json')
-            .then(response => response.json())
-            .then(data => {
-                dramas = data.map(item => ({
-                    '短剧名称': encrypt(item['短剧名称']),
-                    '短剧链接': encrypt(item['短剧链接']),
-                    '主演': item['主演'] ? encrypt(item['主演']) : '',
-                    '简介': item['简介'] ? encrypt(item['简介']) : ''
-                }));
-                console.log('数据加载完成');
-            })
-            .catch(error => console.error('加载数据出错:', error));
-
-        // 搜索函数
-        function search(searchTerm) {
-            return dramas.filter(drama => {
-                try {
-                    const name = decrypt(drama['短剧名称']).toLowerCase();
-                    const actor = drama['主演'] ? decrypt(drama['主演']).toLowerCase() : '';
-                    const desc = drama['简介'] ? decrypt(drama['简介']).toLowerCase() : '';
-                    
-                    return name.includes(searchTerm) || 
-                           actor.includes(searchTerm) || 
-                           desc.includes(searchTerm);
-                } catch(e) {
-                    return false;
-                }
-            });
-        }
-
-        // 显示搜索结果
-        function displayResults(results) {
-            const searchResultsList = document.getElementById('searchResultsList');
-            searchResultsList.innerHTML = '';
-
-            results.forEach(drama => {
-                try {
-                    const resultItem = document.createElement('div');
-                    resultItem.className = 'result-item';
-                    resultItem.innerHTML = `
-                        <div class="result-title">${decrypt(drama['短剧名称'])}</div>
-                        <a href="${decrypt(drama['短剧链接'])}" class="result-link" target="_blank">观看链接</a>
-                    `;
-                    searchResultsList.appendChild(resultItem);
-                } catch(e) {
-                    console.error('显示结果出错');
-                }
-            });
-
-            searchResultsModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // 搜索表单提交事件
-        searchForm.addEventListener('submit', function(e) {
+    // 关闭按钮事件监听
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.onclick = function(e) {
             e.preventDefault();
-            const searchTerm = searchInput.value.toLowerCase();
-            
-            loading.style.display = 'flex';
+            const modal = this.closest('.modal');
+            closeModal(modal);
+        }
+    });
 
-            setTimeout(() => {
-                const results = search(searchTerm);
-                loading.style.display = 'none';
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.preventDefault();
+            closeModal(event.target);
+        }
+    };
+
+    // 联系按钮点击事件
+    contactButton.onclick = function() {
+        showModal(contactModal);
+    };
+
+    // 加载并加密数据
+    fetch('dramas.json')
+        .then(response => response.json())
+        .then(data => {
+            dramas = data.map(item => ({
+                '短剧名称': encrypt(item['短剧名称']),
+                '短剧链接': encrypt(item['短剧链接']),
+                '主演': item['主演'] ? encrypt(item['主演']) : '',
+                '简介': item['简介'] ? encrypt(item['简介']) : ''
+            }));
+            console.log('数据加载完成');
+        })
+        .catch(error => console.error('加载数据出错:', error));
+
+    // 搜索函数
+    function search(searchTerm) {
+        return dramas.filter(drama => {
+            try {
+                const name = decrypt(drama['短剧名称']).toLowerCase();
+                const actor = drama['主演'] ? decrypt(drama['主演']).toLowerCase() : '';
+                const desc = drama['简介'] ? decrypt(drama['简介']).toLowerCase() : '';
                 
-                if (results.length > 0) {
-                    displayResults(results);
-                } else {
-                    noResultsModal.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                }
-            }, 1500);
+                return name.includes(searchTerm) || 
+                       actor.includes(searchTerm) || 
+                       desc.includes(searchTerm);
+            } catch(e) {
+                return false;
+            }
+        });
+    }
+
+    // 显示搜索结果
+    function displayResults(results) {
+        const searchResultsList = document.getElementById('searchResultsList');
+        searchResultsList.innerHTML = '';
+
+        results.forEach(drama => {
+            try {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <div class="result-title">${decrypt(drama['短剧名称'])}</div>
+                    <a href="${decrypt(drama['短剧链接'])}" class="result-link" target="_blank">观看链接</a>
+                `;
+                searchResultsList.appendChild(resultItem);
+            } catch(e) {
+                console.error('显示结果出错');
+            }
         });
 
-        // 防止移动设备缩放
-        document.addEventListener('touchmove', function(event) {
-            if (event.scale !== 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
+        showModal(searchResultsModal);
+    }
 
-        // 防止双击缩放
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+    // 搜索表单提交事件
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        loading.style.display = 'flex';
+
+        setTimeout(() => {
+            const results = search(searchTerm);
+            loading.style.display = 'none';
+            
+            if (results.length > 0) {
+                displayResults(results);
+            } else {
+                showModal(noResultsModal);
             }
-            lastTouchEnd = now;
-        }, false);
-    </script>
+        }, 1500);
+    });
+
+    // 防止移动设备缩放
+    document.addEventListener('touchmove', function(event) {
+        if (event.scale !== 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+
+    // 防止双击缩放
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+</script>
 </body>
 </html>

@@ -88,12 +88,8 @@
         .dog-running {
             width: 100px;
             height: 100px;
-            background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23f9f9f9"/><circle cx="35" cy="40" r="5" fill="%23333"/><circle cx="65" cy="40" r="5" fill="%23333"/><path d="M40 60 Q50 70 60 60" stroke="%23333" stroke-width="3" fill="none"/><path d="M20 50 Q30 60 40 50 Q50 40 60 50 Q70 60 80 50" stroke="%23333" stroke-width="3" fill="none"/></svg>') 0 0 no-repeat;
-            animation: run 0.5s steps(4) infinite;
-        }
-        @keyframes run {
-            0% { background-position: 0 0; }
-            100% { background-position: -400px 0; }
+            background: url('dog-running.gif') no-repeat center center;
+            background-size: cover;
         }
         .results-container {
             display: none;
@@ -253,8 +249,6 @@
         <div id="loading" class="loading-container">
             <div class="dog-running"></div>
         </div>
-
-        <div id="search-results" class="results-container"></div>
     </main>
 
     <footer>
@@ -286,7 +280,6 @@
         let dramas = [];
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
         const loading = document.getElementById('loading');
         const popup = document.getElementById('popup');
         const popupClose = document.getElementById('popup-close');
@@ -311,22 +304,61 @@
             );
         }
 
-        function displayResults(results) {
-            searchResults.innerHTML = ''; // Clear previous results
-            if (results.length > 0) {
-                searchResults.innerHTML = '<h2>搜索结果</h2>';
-                results.forEach(drama => {
-                    searchResults.innerHTML += `
+        function displayResultsPage(results) {
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>搜索结果</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(to bottom right, #1a202c, #2d3748);
+                            color: white;
+                            padding: 1rem;
+                        }
+                        .results-container {
+                            margin-top: 2rem;
+                            width: 100%;
+                            max-width: 600px;
+                            margin: 0 auto;
+                        }
+                        .result-item {
+                            margin-bottom: 1rem;
+                            padding: 1rem;
+                            border-radius: 0.5rem;
+                            background-color: rgba(255, 255, 255, 0.1);
+                            backdrop-filter: blur(10px);
+                            -webkit-backdrop-filter: blur(10px);
+                        }
+                        .result-title {
+                            font-weight: bold;
+                            margin-bottom: 0.5rem;
+                        }
+                        .result-link {
+                            color: #63b3ed;
+                            text-decoration: none;
+                        }
+                        .result-link:hover {
+                            text-decoration: underline;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>搜索结果</h1>
+                    <div class="results-container">
+                    ${results.map(drama => `
                         <div class="result-item">
                             <div class="result-title">${drama['短剧名称']}</div>
                             <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
                         </div>
-                    `;
-                });
-                searchResults.style.display = 'block';
-            } else {
-                popup.style.display = 'block';
-            }
+                    `).join('')}
+                    </div>
+                </body>
+                </html>
+            `);
         }
 
         searchForm.addEventListener('submit', function(e) {
@@ -334,12 +366,15 @@
             const searchTerm = searchInput.value.toLowerCase();
             
             loading.style.display = 'flex';
-            searchResults.style.display = 'none'; // Hide results before loading
 
             setTimeout(() => {
                 const results = search(searchTerm);
                 loading.style.display = 'none';
-                displayResults(results);
+                if (results.length > 0) {
+                    displayResultsPage(results);
+                } else {
+                    popup.style.display = 'block';
+                }
             }, 1500); // Simulate a delay for the search
         });
 

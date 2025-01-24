@@ -2,82 +2,106 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>无限短剧搜索</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             background: linear-gradient(to bottom right, #1a202c, #2d3748);
             color: white;
+            padding-bottom: calc(44px + 2rem);
+            overflow-x: hidden;
         }
+
         header {
-            padding: 3rem 1rem;
+            padding: clamp(1rem, 3vh, 3rem) 1rem;
             text-align: center;
         }
+
         h1 {
-            font-size: 2.5rem;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
             font-weight: bold;
             margin: 0;
         }
+
         main {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 1rem;
+            margin-top: clamp(1rem, 5vh, 3rem);
         }
+
         .search-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 1.5rem;
+            width: clamp(280px, 90%, 400px);
+            padding: clamp(1rem, 3vw, 1.5rem);
             border-radius: 1rem;
             background-color: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .search-form {
             display: flex;
-            gap: 0.5rem;
+            flex-direction: column;
+            gap: 0.8rem;
         }
+
         .search-input {
-            flex-grow: 1;
+            width: 100%;
             padding: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 0.5rem;
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
+            min-height: 44px;
         }
+
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
+
         .search-button {
-            padding: 0.75rem 1.5rem;
+            width: 100%;
+            padding: 0.75rem;
             border: none;
             border-radius: 0.5rem;
             background-color: #4299e1;
             color: white;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            font-size: 1rem;
+            min-height: 44px;
+            transition: background-color 0.3s, transform 0.2s;
         }
+
         .search-button:hover {
             background-color: #3182ce;
+            transform: translateY(-1px);
         }
+
+        .search-button:active {
+            transform: translateY(0);
+        }
+
         .loading-container {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
@@ -85,21 +109,19 @@
             justify-content: center;
             align-items: center;
         }
-        /* 彩虹加载动画 */
+
         .rainbow-loader {
-            width: 80px;
-            height: 80px;
+            width: clamp(40px, 10vw, 80px);
+            height: clamp(40px, 10vw, 80px);
             border-radius: 50%;
             position: relative;
             animation: rainbow-spin 1.5s linear infinite;
         }
+
         .rainbow-loader::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             border-radius: 50%;
             border: 8px solid transparent;
             border-top: 8px solid #ff0000;
@@ -108,59 +130,98 @@
             border-left: 8px solid #ff00ff;
             animation: rainbow-glow 2s linear infinite;
         }
+
         @keyframes rainbow-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
+
         @keyframes rainbow-glow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
+            to { filter: hue-rotate(360deg); }
         }
+
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             z-index: 1001;
+            overflow-y: auto;
         }
+
         .modal-content {
             background-color: rgba(26, 32, 44, 0.95);
-            margin: 5% auto;
-            padding: 2rem;
+            margin: clamp(1rem, 5vh, 5%) auto;
+            padding: clamp(1rem, 3vw, 2rem);
             border: 1px solid #4a5568;
-            width: 90%;
-            max-width: 600px;
+            width: clamp(280px, 90%, 600px);
             border-radius: 1rem;
             position: relative;
             color: white;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
+
         .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
             color: #aaa;
-            float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            height: 44px;
+            width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
         }
+
         .close:hover {
             color: #fff;
         }
-        footer {
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.875rem;
-            color: #a0aec0;
+
+        .result-item {
+            margin-bottom: 1rem;
+            padding: clamp(0.75rem, 2vw, 1rem);
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
         }
+
+        .result-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+        }
+
+        .result-link {
+            color: #63b3ed;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: rgba(99, 179, 237, 0.1);
+            border-radius: 0.25rem;
+            transition: background-color 0.3s;
+            min-height: 44px;
+        }
+
+        .result-link:hover {
+            background-color: rgba(99, 179, 237, 0.2);
+        }
+
         #contactButton {
             position: fixed;
             bottom: 1rem;
             left: 1rem;
-            padding: 0.5rem 1rem;
+            padding: clamp(0.5rem, 2vw, 1rem);
             background-color: white;
             color: #2d3748;
             border: 2px solid #ffd700;
@@ -168,54 +229,74 @@
             cursor: pointer;
             font-weight: bold;
             z-index: 100;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            min-height: 44px;
             animation: pulse 2s infinite;
         }
+
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
             100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
         }
-        .result-item {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s;
-        }
-        .result-item:hover {
-            transform: translateY(-2px);
-        }
-        .result-title {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-        .result-link {
-            color: #63b3ed;
-            text-decoration: none;
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background-color: rgba(99, 179, 237, 0.1);
-            border-radius: 0.25rem;
-            transition: background-color 0.3s;
-        }
-        .result-link:hover {
-            background-color: rgba(99, 179, 237, 0.2);
-        }
-        #noResultsModal {
-            text-align: center;
-        }
+
         .qq-group {
             background-color: #4a5568;
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 0.25rem;
             text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
             margin-top: 1rem;
+            transition: background-color 0.3s;
         }
+
         .qq-group:hover {
             background-color: #2d3748;
+        }
+
+        footer {
+            padding: clamp(0.75rem, 2vh, 1rem);
+            text-align: center;
+            font-size: clamp(0.75rem, 2vw, 0.875rem);
+            color: #a0aec0;
+            margin-top: auto;
+        }
+
+        @media screen and (min-width: 768px) {
+            .search-form {
+                flex-direction: row;
+            }
+
+            .search-button {
+                width: auto;
+                padding: 0.75rem 1.5rem;
+            }
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        #noResultsModal {
+            text-align: center;
+        }
+
+        h2 {
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -297,12 +378,12 @@
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
-        }
+        };
 
         // 联系按钮点击事件
         contactButton.onclick = function() {
             contactModal.style.display = 'block';
-        }
+        };
 
         // 加载 JSON 数据
         fetch('dramas.json')
@@ -325,7 +406,7 @@
         // 显示搜索结果
         function displayResults(results) {
             const searchResultsList = document.getElementById('searchResultsList');
-            searchResultsList.innerHTML = ''; // 清空之前的结果
+            searchResultsList.innerHTML = '';
 
             results.forEach(drama => {
                 const resultItem = document.createElement('div');
@@ -340,7 +421,7 @@
             searchResultsModal.style.display = 'block';
         }
 
-        // 搜索表单提交事件
+// 搜索表单提交事件
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const searchTerm = searchInput.value.toLowerCase();
@@ -358,6 +439,23 @@
                 }
             }, 1500);
         });
+
+        // 防止移动设备缩放
+        document.addEventListener('touchmove', function(event) {
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // 双击防止缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
     </script>
 </body>
 </html>

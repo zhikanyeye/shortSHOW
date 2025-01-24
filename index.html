@@ -85,90 +85,76 @@
             justify-content: center;
             align-items: center;
         }
-        .dog-running {
-            width: 100px;
-            height: 100px;
-            background: url('dog-running.gif') no-repeat center center;
-            background-size: cover;
+        /* 彩虹加载动画 */
+        .rainbow-loader {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: relative;
+            animation: rainbow-spin 1.5s linear infinite;
         }
-        .results-container {
-            display: none;
-            margin-top: 2rem;
+        .rainbow-loader::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid transparent;
+            border-top: 8px solid #ff0000;
+            border-right: 8px solid #00ff00;
+            border-bottom: 8px solid #0000ff;
+            border-left: 8px solid #ff00ff;
+            animation: rainbow-glow 2s linear infinite;
+        }
+        @keyframes rainbow-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes rainbow-glow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1001;
+        }
+        .modal-content {
+            background-color: rgba(26, 32, 44, 0.95);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid #4a5568;
+            width: 90%;
             max-width: 600px;
+            border-radius: 1rem;
+            position: relative;
+            color: white;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        .result-item {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .result-title {
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            cursor: pointer;
         }
-        .result-link {
-            color: #63b3ed;
-            text-decoration: none;
-        }
-        .result-link:hover {
-            text-decoration: underline;
+        .close:hover {
+            color: #fff;
         }
         footer {
             padding: 1rem;
             text-align: center;
             font-size: 0.875rem;
             color: #a0aec0;
-        }
-        .popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(26, 32, 44, 0.95);
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            max-width: 90%;
-            width: 400px;
-            text-align: center;
-        }
-        .popup h2 {
-            margin-top: 0;
-            color: #f7fafc;
-        }
-        .popup p {
-            margin-bottom: 1.5rem;
-            color: #e2e8f0;
-        }
-        .popup-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #a0aec0;
-            cursor: pointer;
-        }
-        .popup-close:hover {
-            color: #f7fafc;
-        }
-        .qq-group {
-            background-color: #4a5568;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.25rem;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-        .qq-group:hover {
-            background-color: #2d3748;
         }
         #contactButton {
             position: fixed;
@@ -185,51 +171,51 @@
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-        .modal-content {
-            background-color: rgba(255, 255, 255, 0.1);
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
+        .result-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
             border-radius: 0.5rem;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s;
         }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        .result-item:hover {
+            transform: translateY(-2px);
+        }
+        .result-title {
             font-weight: bold;
+            margin-bottom: 0.5rem;
         }
-        .close:hover,
-        .close:focus {
-            color: #fff;
+        .result-link {
+            color: #63b3ed;
             text-decoration: none;
-            cursor: pointer;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: rgba(99, 179, 237, 0.1);
+            border-radius: 0.25rem;
+            transition: background-color 0.3s;
+        }
+        .result-link:hover {
+            background-color: rgba(99, 179, 237, 0.2);
+        }
+        #noResultsModal {
+            text-align: center;
+        }
+        .qq-group {
+            background-color: #4a5568;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+        }
+        .qq-group:hover {
+            background-color: #2d3748;
         }
     </style>
 </head>
@@ -247,28 +233,34 @@
         </div>
 
         <div id="loading" class="loading-container">
-            <div class="dog-running"></div>
+            <div class="rainbow-loader"></div>
         </div>
     </main>
 
-    <footer>
-        <p>© 2024 清风密藏. 保留所有权利.</p>
-        <p>网站资源均来源网络，若有侵权联系删除。</p>
-    </footer>
-
-    <div id="popup" class="popup">
-        <button id="popup-close" class="popup-close">&times;</button>
-        <h2>暂无资源</h2>
-        <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
-        <p>请加入我们的QQ群联系群主添加：</p>
-        <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+    <!-- 搜索结果模态框 -->
+    <div id="searchResultsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="searchResultsClose">&times;</span>
+            <h2>搜索结果</h2>
+            <div id="searchResultsList"></div>
+        </div>
     </div>
 
-    <button id="contactButton">联系站长</button>
-
-    <div id="myModal" class="modal">
+    <!-- 无结果模态框 -->
+    <div id="noResultsModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close" id="noResultsClose">&times;</span>
+            <h2>暂无资源</h2>
+            <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
+            <p>请加入我们的QQ群联系群主添加：</p>
+            <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+        </div>
+    </div>
+
+    <!-- 联系方式模态框 -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="contactClose">&times;</span>
             <h2>联系信息</h2>
             <p>站长邮箱: qingfeng@zhikan.000.pe</p>
             <p>由智看'清风'友情提供付费短剧免费观看。</p>
@@ -276,16 +268,41 @@
         </div>
     </div>
 
+    <button id="contactButton">联系站长</button>
+
+    <footer>
+        <p>© 2024 清风密藏. 保留所有权利.</p>
+        <p>网站资源均来源网络，若有侵权联系删除。</p>
+    </footer>
+
     <script>
         let dramas = [];
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const loading = document.getElementById('loading');
-        const popup = document.getElementById('popup');
-        const popupClose = document.getElementById('popup-close');
+        const searchResultsModal = document.getElementById('searchResultsModal');
+        const noResultsModal = document.getElementById('noResultsModal');
+        const contactModal = document.getElementById('contactModal');
         const contactButton = document.getElementById('contactButton');
-        const modal = document.getElementById('myModal');
-        const span = document.getElementsByClassName('close')[0];
+
+        // 关闭按钮事件监听
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.onclick = function() {
+                this.closest('.modal').style.display = 'none';
+            }
+        });
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // 联系按钮点击事件
+        contactButton.onclick = function() {
+            contactModal.style.display = 'block';
+        }
 
         // 加载 JSON 数据
         fetch('dramas.json')
@@ -296,6 +313,7 @@
             })
             .catch(error => console.error('加载数据出错:', error));
 
+        // 搜索函数
         function search(searchTerm) {
             return dramas.filter(drama => 
                 drama['短剧名称'].toLowerCase().includes(searchTerm) ||
@@ -304,63 +322,25 @@
             );
         }
 
-        function displayResultsPage(results) {
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(`
-                <html lang="zh-CN">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>搜索结果</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            background: linear-gradient(to bottom right, #1a202c, #2d3748);
-                            color: white;
-                            padding: 1rem;
-                        }
-                        .results-container {
-                            margin-top: 2rem;
-                            width: 100%;
-                            max-width: 600px;
-                            margin: 0 auto;
-                        }
-                        .result-item {
-                            margin-bottom: 1rem;
-                            padding: 1rem;
-                            border-radius: 0.5rem;
-                            background-color: rgba(255, 255, 255, 0.1);
-                            backdrop-filter: blur(10px);
-                            -webkit-backdrop-filter: blur(10px);
-                        }
-                        .result-title {
-                            font-weight: bold;
-                            margin-bottom: 0.5rem;
-                        }
-                        .result-link {
-                            color: #63b3ed;
-                            text-decoration: none;
-                        }
-                        .result-link:hover {
-                            text-decoration: underline;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>搜索结果</h1>
-                    <div class="results-container">
-                    ${results.map(drama => `
-                        <div class="result-item">
-                            <div class="result-title">${drama['短剧名称']}</div>
-                            <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
-                        </div>
-                    `).join('')}
-                    </div>
-                </body>
-                </html>
-            `);
+        // 显示搜索结果
+        function displayResults(results) {
+            const searchResultsList = document.getElementById('searchResultsList');
+            searchResultsList.innerHTML = ''; // 清空之前的结果
+
+            results.forEach(drama => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <div class="result-title">${drama['短剧名称']}</div>
+                    <a href="${drama['短剧链接']}" class="result-link" target="_blank">观看链接</a>
+                `;
+                searchResultsList.appendChild(resultItem);
+            });
+
+            searchResultsModal.style.display = 'block';
         }
 
+        // 搜索表单提交事件
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const searchTerm = searchInput.value.toLowerCase();
@@ -370,31 +350,14 @@
             setTimeout(() => {
                 const results = search(searchTerm);
                 loading.style.display = 'none';
+                
                 if (results.length > 0) {
-                    displayResultsPage(results);
+                    displayResults(results);
                 } else {
-                    popup.style.display = 'block';
+                    noResultsModal.style.display = 'block';
                 }
-            }, 1500); // Simulate a delay for the search
+            }, 1500);
         });
-
-        popupClose.addEventListener('click', function() {
-            popup.style.display = 'none';
-        });
-
-        contactButton.onclick = function() {
-            modal.style.display = 'block';
-        }
-
-        span.onclick = function() {
-            modal.style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
     </script>
 </body>
 </html>

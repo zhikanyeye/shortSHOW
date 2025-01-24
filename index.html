@@ -70,7 +70,7 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .search-container {
+       .search-container {
             width: 100%;
             max-width: 400px;
             padding: 1.5rem;
@@ -179,7 +179,7 @@
             0% { filter: hue-rotate(0deg); }
             100% { filter: hue-rotate(360deg); }
         }
-        /* 修复后的模态框样式 */
+        /* 优化后的模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -191,49 +191,98 @@
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             z-index: 1001;
-            opacity: 1;
+            opacity: 0;
             transition: opacity 0.3s ease;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
         }
 
         .modal.active {
             display: flex;
+            opacity: 1;
             justify-content: center;
-            align-items: center;
-            padding: 20px 0;
+            align-items: flex-start;
         }
 
         .modal-content {
             background-color: rgba(26, 32, 44, 0.95);
-            padding: 2rem;
-            border: 1px solid #4a5568;
             width: 90%;
             max-width: 600px;
+            margin: 20px auto;
             border-radius: 1rem;
             position: relative;
             color: white;
-            margin: auto;
-            animation: modalSlideIn 0.3s ease;
-            touch-action: pan-y pinch-zoom;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh; /* 设置最大高度 */
+            height: auto;
         }
 
-        @keyframes modalSlideIn {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        .modal h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+        .modal-header h2 {
+            margin: 0;
             text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 1.5rem;
+            overscroll-behavior: contain;
+        }
+
+        #searchResultsList {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .result-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-item:active {
+            transform: scale(0.98);
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .result-link {
+            color: #63b3ed;
+            text-decoration: none;
+            display: block;
+            padding: 0.8rem;
+            background-color: rgba(99, 179, 237, 0.1);
+            border-radius: 0.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .result-link:active {
+            background-color: rgba(99, 179, 237, 0.2);
+            transform: translateY(1px);
         }
 
         .close {
@@ -244,15 +293,67 @@
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            transition: color 0.3s ease;
-            padding: 0 10px;
-            line-height: 1;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            z-index: 2;
         }
 
         .close:hover {
             color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
+        /* 移动端优化 */
+        @media screen and (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10px auto;
+                max-height: 90vh;
+            }
+
+            .modal-header {
+                padding: 1rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .result-item {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .close {
+                right: 0.5rem;
+                top: 0.5rem;
+            }
+        }
+
+        /* 滚动条样式 */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        /* 联系按钮和页脚样式 */
         #contactButton {
             position: fixed;
             bottom: 1rem;
@@ -270,52 +371,9 @@
             opacity: 1;
         }
 
-        #contactButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
-        }
-
-        .result-item {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            word-break: break-word;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-        .result-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .result-title {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .result-link {
-            color: #63b3ed;
-            text-decoration: none;
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background-color: rgba(99, 179, 237, 0.1);
-            border-radius: 0.25rem;
-            transition: all 0.3s ease;
-            width: 100%;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        .result-link:hover {
-            background-color: rgba(99, 179, 237, 0.2);
-            transform: translateY(-1px);
+        #contactButton:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 4px rgba(255, 215, 0, 0.2);
         }
 
         footer {
@@ -323,96 +381,30 @@
             text-align: center;
             font-size: 0.875rem;
             color: #a0aec0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 99;
         }
 
         .qq-group {
             background-color: #4a5568;
             color: white;
-            padding: 0.5rem 1rem;
+            padding: 0.8rem 1.2rem;
             border-radius: 0.25rem;
             text-decoration: none;
             display: inline-block;
             transition: all 0.3s ease;
             margin-top: 1rem;
+            font-weight: bold;
         }
 
-        .qq-group:hover {
+        .qq-group:active {
             background-color: #2d3748;
-            transform: translateY(-1px);
-        }
-
-        /* 移动端适配 */
-        @media screen and (max-width: 768px) {
-            header {
-                padding: 2rem 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .search-container {
-                padding: 1rem;
-            }
-
-            .search-form {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-
-            .search-button {
-                width: 100%;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 10px;
-                padding: 1.5rem;
-            }
-
-            .rainbow-loader {
-                width: 60px;
-                height: 60px;
-            }
-
-            .close {
-                right: 0.5rem;
-                top: 0.5rem;
-            }
-        }
-
-        /* 触摸优化 */
-        @media (hover: none) and (pointer: coarse) {
-            .modal {
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .modal-content {
-                touch-action: pan-y pinch-zoom;
-            }
-            
-            #searchResultsList {
-                touch-action: pan-y pinch-zoom;
-            }
-        }
-
-        /* 自定义滚动条 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(1px);
         }
     </style>
 </head>
@@ -437,21 +429,29 @@
     <!-- 搜索结果模态框 -->
     <div id="searchResultsModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="searchResultsClose">&times;</span>
-            <h2>搜索结果</h2>
-            <div id="searchResultsList"></div>
+            <div class="modal-header">
+                <h2>搜索结果</h2>
+                <span class="close" id="searchResultsClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="searchResultsList"></div>
+            </div>
         </div>
     </div>
 
     <!-- 无结果模态框 -->
     <div id="noResultsModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="noResultsClose">&times;</span>
-            <h2>暂无资源</h2>
-            <p style="text-align: center; margin-bottom: 1rem;">很抱歉，我们目前没有您搜索的短剧资源。</p>
-            <p style="text-align: center; margin-bottom: 1rem;">请加入我们的QQ群联系群主添加：</p>
-            <div style="text-align: center;">
-                <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+            <div class="modal-header">
+                <h2>暂无资源</h2>
+                <span class="close" id="noResultsClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 1rem;">很抱歉，我们目前没有您搜索的短剧资源。</p>
+                <p style="text-align: center; margin-bottom: 1rem;">请加入我们的QQ群联系群主添加：</p>
+                <div style="text-align: center;">
+                    <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+                </div>
             </div>
         </div>
     </div>
@@ -459,12 +459,16 @@
     <!-- 联系方式模态框 -->
     <div id="contactModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="contactClose">&times;</span>
-            <h2>联系信息</h2>
-            <div style="text-align: center;">
-                <p style="margin-bottom: 1rem;">站长邮箱: qingfeng@zhikan.000.pe</p>
-                <p style="margin-bottom: 1rem;">由览胜'清风'友情提供付费短剧免费观看。</p>
-                <p>求剧求资源，请关注公众号览胜科语，联系作者 😍</p>
+            <div class="modal-header">
+                <h2>联系信息</h2>
+                <span class="close" id="contactClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center;">
+                    <p style="margin-bottom: 1rem;">站长邮箱: qingfeng@zhikan.000.pe</p>
+                    <p style="margin-bottom: 1rem;">由览胜'清风'友情提供付费短剧免费观看。</p>
+                    <p>求剧求资源，请关注公众号览胜科语，联系作者 😍</p>
+                </div>
             </div>
         </div>
     </div>
@@ -485,43 +489,44 @@
     const noResultsModal = document.getElementById('noResultsModal');
     const contactModal = document.getElementById('contactModal');
     const contactButton = document.getElementById('contactButton');
+    const modals = document.querySelectorAll('.modal');
 
     // 优化后的模态框显示函数
     function showModal(modal) {
+        document.body.style.overflow = 'hidden';
         modal.classList.add('active');
-        // 设置模态框内容区域最大高度
+        
+        // 重置模态框滚动位置
+        const modalBody = modal.querySelector('.modal-body');
+        if (modalBody) {
+            modalBody.scrollTop = 0;
+        }
+        
+        // 设置模态框内容的最大高度
         const modalContent = modal.querySelector('.modal-content');
         const windowHeight = window.innerHeight;
-        modalContent.style.maxHeight = `${windowHeight * 0.9}px`; // 设置为窗口高度的90%
-        modalContent.style.overflowY = 'auto';
-        document.body.style.overflow = 'hidden';
+        const headerHeight = modal.querySelector('.modal-header')?.offsetHeight || 0;
+        const maxHeight = windowHeight - 40; // 上下各留20px的间距
+        modalContent.style.maxHeight = `${maxHeight}px`;
+        
+        if (modalBody) {
+            modalBody.style.maxHeight = `${maxHeight - headerHeight}px`;
+        }
     }
 
     // 优化后的模态框关闭函数
     function closeModal(modal) {
         modal.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        document.body.style.overflow = '';
     }
 
     // 联系按钮渐隐功能
     function hideContactButton() {
         contactButton.style.opacity = '0';
         setTimeout(() => {
-            contactButton.style.visibility = 'hidden';
+            contactButton.style.display = 'none';
         }, 1000);
     }
-
-    // 页面加载完成后一分钟执行渐隐
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(hideContactButton, 60000);
-    });
-
-    // 页面刷新时重置按钮状态
-    window.onload = () => {
-        contactButton.style.opacity = '1';
-        contactButton.style.visibility = 'visible';
-        setTimeout(hideContactButton, 60000);
-    };
 
     // 加密函数
     function encrypt(text) {
@@ -533,29 +538,69 @@
         return decodeURIComponent(atob(text.split('').reverse().join('')));
     }
 
-    // 关闭按钮事件监听
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.onclick = function(e) {
-            e.preventDefault();
-            const modal = this.closest('.modal');
-            closeModal(modal);
+    // 设置当前时间
+    const currentTime = "2025-01-24 12:40:03";
+    console.log('Current time:', currentTime);
+
+    // 触摸事件处理优化
+    modals.forEach(modal => {
+        const modalContent = modal.querySelector('.modal-content');
+        const modalBody = modal.querySelector('.modal-body');
+        
+        if (modalBody) {
+            let startY = 0;
+            let startScrollTop = 0;
+
+            modalBody.addEventListener('touchstart', function(e) {
+                startY = e.touches[0].pageY;
+                startScrollTop = this.scrollTop;
+                
+                // 检查是否可以滚动
+                const canScrollUp = this.scrollTop > 0;
+                const canScrollDown = this.scrollTop < this.scrollHeight - this.clientHeight;
+                
+                if (!canScrollUp && !canScrollDown) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            modalBody.addEventListener('touchmove', function(e) {
+                const deltaY = e.touches[0].pageY - startY;
+                const isAtTop = this.scrollTop <= 0;
+                const isAtBottom = this.scrollTop >= this.scrollHeight - this.clientHeight;
+                
+                // 防止到达顶部或底部时的页面滚动
+                if ((isAtTop && deltaY > 0) || (isAtBottom && deltaY < 0)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         }
     });
 
+    // 关闭按钮事件处理
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modal = this.closest('.modal');
+            closeModal(modal);
+        });
+    });
+
     // 点击模态框外部关闭
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.preventDefault();
-            closeModal(event.target);
-        }
-    };
+    modals.forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal(this);
+            }
+        });
+    });
 
     // 联系按钮点击事件
-    contactButton.onclick = function() {
+    contactButton.addEventListener('click', function() {
         showModal(contactModal);
-    };
+    });
 
-    // 加载并加密数据
+    // 加载数据
     fetch('dramas.json')
         .then(response => response.json())
         .then(data => {
@@ -611,7 +656,9 @@
     // 搜索表单提交事件
     searchForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        const searchTerm = searchInput.value.toLowerCase();
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        if (!searchTerm) return;
         
         loading.style.display = 'flex';
 
@@ -624,22 +671,26 @@
             } else {
                 showModal(noResultsModal);
             }
-        }, 1500);
+        }, 1000);
     });
 
-    // 防止移动设备缩放
-    document.addEventListener('touchmove', function(event) {
-        if (event.scale !== 1) {
-            event.preventDefault();
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(hideContactButton, 60000);
+    });
+
+    // 防止iOS橡皮筋效果和双击缩放
+    document.addEventListener('touchmove', function(e) {
+        if (!e.target.closest('.modal-body')) {
+            e.preventDefault();
         }
     }, { passive: false });
 
-    // 防止双击缩放
     let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(event) {
-        const now = (new Date()).getTime();
+    document.addEventListener('touchend', function(e) {
+        const now = Date.now();
         if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
+            e.preventDefault();
         }
         lastTouchEnd = now;
     }, false);

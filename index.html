@@ -3,697 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>无限短剧搜索</title>
+    <title>shortSHOW - 无限短剧搜索</title>
+    
+    <!-- SEO优化 -->
+    <meta name="description" content="免费短剧搜索平台，提供海量短剧资源，支持按剧名、演员、关键词搜索">
+    <meta name="keywords" content="短剧,免费观看,搜索,在线视频,短视频">
+    
+    <!-- 防止缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(-45deg, #1a202c, #2d3748, #234e52, #2c5282);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: white;
-            overflow-x: hidden;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        header {
-            padding: 3rem 1rem;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-       .search-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 1s ease-out 0.3s backwards;
-        }
-
-        .search-form {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .search-input {
-            flex-grow: 1;
-            padding: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 0.5rem;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.3);
-        }
-
-        .search-button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            background-color: #4299e1;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            transform: translateY(0);
-        }
-
-        .search-button:hover {
-            background-color: #3182ce;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
-        }
-
-        .search-button:active {
-            transform: translateY(0);
-        }
-
-        .loading-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .rainbow-loader {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            position: relative;
-            animation: rainbow-spin 1.5s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-        }
-
-        .rainbow-loader::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 8px solid transparent;
-            border-top: 8px solid #ff0000;
-            border-right: 8px solid #00ff00;
-            border-bottom: 8px solid #0000ff;
-            border-left: 8px solid #ff00ff;
-            animation: rainbow-glow 2s linear infinite;
-        }
-
-        @keyframes rainbow-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes rainbow-glow {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
-        /* 优化后的模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 1001;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            overflow: hidden;
-        }
-
-        .modal.active {
-            display: flex;
-            opacity: 1;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .modal-content {
-            background-color: rgba(26, 32, 44, 0.95);
-            width: 90%;
-            max-width: 600px;
-            margin: 20px auto;
-            border-radius: 1rem;
-            position: relative;
-            color: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh; /* 设置最大高度 */
-            height: auto;
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 1.5rem;
-            overscroll-behavior: contain;
-        }
-
-        #searchResultsList {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .result-item {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .result-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-item:active {
-            transform: scale(0.98);
-        }
-
-        .result-title {
-            font-weight: bold;
-            margin-bottom: 0.8rem;
-            font-size: 1.1rem;
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .result-link {
-            color: #63b3ed;
-            text-decoration: none;
-            display: block;
-            padding: 0.8rem;
-            background-color: rgba(99, 179, 237, 0.1);
-            border-radius: 0.25rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .result-link:active {
-            background-color: rgba(99, 179, 237, 0.2);
-            transform: translateY(1px);
-        }
-
-        .close {
-            position: absolute;
-            right: 1rem;
-            top: 1rem;
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-
-        .close:hover {
-            color: #fff;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* 移动端优化 */
-        @media screen and (max-width: 768px) {
-            .modal-content {
-                width: 95%;
-                margin: 10px auto;
-                max-height: 90vh;
-            }
-
-            .modal-header {
-                padding: 1rem;
-            }
-
-            .modal-body {
-                padding: 1rem;
-            }
-
-            .result-item {
-                padding: 0.8rem;
-                margin-bottom: 0.8rem;
-            }
-
-            .close {
-                right: 0.5rem;
-                top: 0.5rem;
-            }
-        }
-
-        /* 滚动条样式 */
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        /* 联系按钮和页脚样式 */
-        #contactButton {
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            color: #2d3748;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-            transition: all 0.3s ease, opacity 1s ease;
-            opacity: 1;
-        }
-
-        #contactButton:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 4px rgba(255, 215, 0, 0.2);
-        }
-
-        footer {
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.875rem;
-            color: #a0aec0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: rgba(26, 32, 44, 0.8);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 99;
-        }
-
-        .qq-group {
-            background-color: #4a5568;
-            color: white;
-            padding: 0.8rem 1.2rem;
-            border-radius: 0.25rem;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-
-        .qq-group:active {
-            background-color: #2d3748;
-            transform: translateY(1px);
-        }
-    </style>
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    
+    <!-- PWA支持 -->
+    <meta name="theme-color" content="#4299e1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
-<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
-    <header>
-        <h1>无限短剧搜索</h1>
+<body>
+    <!-- 页面头部 -->
+    <header class="header">
+        <h1 class="title">🎬 无限短剧搜索</h1>
+        <p class="subtitle">发现精彩短剧，尽在指尖</p>
     </header>
 
-    <main>
+    <!-- 主要内容区域 -->
+    <main class="main">
+        <!-- 搜索区域 -->
         <div class="search-container">
-            <form id="search-form" class="search-form">
-                <input type="search" id="search-input" class="search-input" placeholder="搜索短剧名称、主演、任意关键词..." required>
-                <button type="submit" class="search-button">搜索</button>
+            <form id="searchForm" class="search-form">
+                <div class="search-input-wrapper">
+                    <input 
+                        type="search" 
+                        id="searchInput" 
+                        class="search-input" 
+                        placeholder="搜索短剧名称、主演、任意关键词..." 
+                        required
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="search-button">
+                        <span class="search-icon">🔍</span>
+                        搜索
+                    </button>
+                </div>
             </form>
+            
+            <!-- 搜索建议 -->
+            <div id="searchSuggestions" class="search-suggestions hidden"></div>
+            
+            <!-- 热门搜索 -->
+            <div class="hot-searches">
+                <span class="hot-label">🔥 热门搜索：</span>
+                <div class="hot-tags">
+                    <span class="hot-tag" data-search="总裁">总裁</span>
+                    <span class="hot-tag" data-search="重生">重生</span>
+                    <span class="hot-tag" data-search="古代">古代</span>
+                    <span class="hot-tag" data-search="战神">战神</span>
+                </div>
+            </div>
         </div>
 
-        <div id="loading" class="loading-container">
-            <div class="rainbow-loader"></div>
+        <!-- 统计信息 -->
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-number" id="totalDramas">0</span>
+                <span class="stat-label">部短剧</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="totalSearches">0</span>
+                <span class="stat-label">次搜索</span>
+            </div>
+        </div>
+
+        <!-- 加载动画 -->
+        <div id="loading" class="loading-container hidden">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">正在搜索中...</p>
         </div>
     </main>
 
     <!-- 搜索结果模态框 -->
-    <div id="searchResultsModal" class="modal">
+    <div id="searchResultsModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>搜索结果</h2>
-                <span class="close" id="searchResultsClose">&times;</span>
+                <h2 id="resultsTitle">搜索结果</h2>
+                <button class="modal-close" id="searchResultsClose">×</button>
             </div>
             <div class="modal-body">
-                <div id="searchResultsList"></div>
+                <div id="searchResultsList" class="results-list"></div>
             </div>
         </div>
     </div>
 
     <!-- 无结果模态框 -->
-    <div id="noResultsModal" class="modal">
+    <div id="noResultsModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>暂无资源</h2>
-                <span class="close" id="noResultsClose">&times;</span>
+                <button class="modal-close" id="noResultsClose">×</button>
             </div>
             <div class="modal-body">
-                <p style="text-align: center; margin-bottom: 1rem;">很抱歉，我们目前没有您搜索的短剧资源。</p>
-                <p style="text-align: center; margin-bottom: 1rem;">请加入我们的QQ群联系群主添加：</p>
-                <div style="text-align: center;">
-                    <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key&jump_from=webapi&authKey=your_auth_key" class="qq-group" target="_blank">QQ群：941550759</a>
+                <div class="no-results-content">
+                    <div class="no-results-icon">😔</div>
+                    <p>很抱歉，我们目前没有您搜索的短剧资源。</p>
+                    <p>请尝试其他关键词，或联系我们添加资源：</p>
+                    <a href="https://qm.qq.com/cgi-bin/qm/qr?k=your_qq_group_key" class="qq-group-link" target="_blank">
+                        QQ群：941550759
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 联系方式模态框 -->
-    <div id="contactModal" class="modal">
+    <div id="contactModal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>联系信息</h2>
-                <span class="close" id="contactClose">&times;</span>
+                <button class="modal-close" id="contactClose">×</button>
             </div>
             <div class="modal-body">
-                <div style="text-align: center;">
-                    <p style="margin-bottom: 1rem;">站长邮箱: qingfeng@zhikan.000.pe</p>
-                    <p style="margin-bottom: 1rem;">由览胜'清风'友情提供付费短剧免费观看。</p>
-                    <p>求剧求资源，请关注公众号览胜科语，联系作者 😍</p>
+                <div class="contact-content">
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span>站长邮箱: qingfeng@zhikan.000.pe</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">👤</span>
+                        <span>由览胜'清风'友情提供付费短剧免费观看</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <span>求剧求资源，请关注公众号览胜科语，联系作者 😍</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <button id="contactButton">联系站长</button>
+    <!-- 悬浮按钮 -->
+    <div class="floating-buttons">
+        <button id="contactButton" class="floating-btn contact-btn">
+            <span class="btn-icon">💬</span>
+            <span class="btn-text">联系站长</span>
+        </button>
+        <button id="backToTop" class="floating-btn back-to-top hidden">
+            <span class="btn-icon">⬆️</span>
+        </button>
+    </div>
 
-    <footer>
-        <p>© 2025 清风密藏 保留所有权利.</p>
-        <p>网站资源均来源网络，若有侵权联系删除。</p>
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>© 2025 清风密藏 保留所有权利</p>
+        <p>网站资源均来源网络，若有侵权联系删除</p>
+        <p class="update-time">最后更新: <span id="lastUpdate">2025-05-29</span></p>
     </footer>
-    <script>
-    // 基础变量初始化
-    let dramas = [];
-    const searchForm = document.getElementById('search-form');
-    const searchInput = document.getElementById('search-input');
-    const loading = document.getElementById('loading');
-    const searchResultsModal = document.getElementById('searchResultsModal');
-    const noResultsModal = document.getElementById('noResultsModal');
-    const contactModal = document.getElementById('contactModal');
-    const contactButton = document.getElementById('contactButton');
-    const modals = document.querySelectorAll('.modal');
 
-    // 优化后的模态框显示函数
-    function showModal(modal) {
-        document.body.style.overflow = 'hidden';
-        modal.classList.add('active');
-        
-        // 重置模态框滚动位置
-        const modalBody = modal.querySelector('.modal-body');
-        if (modalBody) {
-            modalBody.scrollTop = 0;
-        }
-        
-        // 设置模态框内容的最大高度
-        const modalContent = modal.querySelector('.modal-content');
-        const windowHeight = window.innerHeight;
-        const headerHeight = modal.querySelector('.modal-header')?.offsetHeight || 0;
-        const maxHeight = windowHeight - 40; // 上下各留20px的间距
-        modalContent.style.maxHeight = `${maxHeight}px`;
-        
-        if (modalBody) {
-            modalBody.style.maxHeight = `${maxHeight - headerHeight}px`;
-        }
-    }
-
-    // 优化后的模态框关闭函数
-    function closeModal(modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // 联系按钮渐隐功能
-    function hideContactButton() {
-        contactButton.style.opacity = '0';
-        setTimeout(() => {
-            contactButton.style.display = 'none';
-        }, 1000);
-    }
-
-    // 加密函数
-    function encrypt(text) {
-        return btoa(encodeURIComponent(text)).split('').reverse().join('');
-    }
-
-    // 解密函数
-    function decrypt(text) {
-        return decodeURIComponent(atob(text.split('').reverse().join('')));
-    }
-
-    // 设置当前时间
-    const currentTime = "2025-01-24 12:40:03";
-    console.log('Current time:', currentTime);
-
-    // 触摸事件处理优化
-    modals.forEach(modal => {
-        const modalContent = modal.querySelector('.modal-content');
-        const modalBody = modal.querySelector('.modal-body');
-        
-        if (modalBody) {
-            let startY = 0;
-            let startScrollTop = 0;
-
-            modalBody.addEventListener('touchstart', function(e) {
-                startY = e.touches[0].pageY;
-                startScrollTop = this.scrollTop;
-                
-                // 检查是否可以滚动
-                const canScrollUp = this.scrollTop > 0;
-                const canScrollDown = this.scrollTop < this.scrollHeight - this.clientHeight;
-                
-                if (!canScrollUp && !canScrollDown) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-
-            modalBody.addEventListener('touchmove', function(e) {
-                const deltaY = e.touches[0].pageY - startY;
-                const isAtTop = this.scrollTop <= 0;
-                const isAtBottom = this.scrollTop >= this.scrollHeight - this.clientHeight;
-                
-                // 防止到达顶部或底部时的页面滚动
-                if ((isAtTop && deltaY > 0) || (isAtBottom && deltaY < 0)) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-        }
-    });
-
-    // 关闭按钮事件处理
-    document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const modal = this.closest('.modal');
-            closeModal(modal);
-        });
-    });
-
-    // 点击模态框外部关闭
-    modals.forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal(this);
-            }
-        });
-    });
-
-    // 联系按钮点击事件
-    contactButton.addEventListener('click', function() {
-        showModal(contactModal);
-    });
-
-    // 加载数据
-    fetch('dramas.json')
-        .then(response => response.json())
-        .then(data => {
-            dramas = data.map(item => ({
-                '短剧名称': encrypt(item['短剧名称']),
-                '短剧链接': encrypt(item['短剧链接']),
-                '主演': item['主演'] ? encrypt(item['主演']) : '',
-                '简介': item['简介'] ? encrypt(item['简介']) : ''
-            }));
-            console.log('数据加载完成');
-        })
-        .catch(error => console.error('加载数据出错:', error));
-
-    // 搜索函数
-    function search(searchTerm) {
-        return dramas.filter(drama => {
-            try {
-                const name = decrypt(drama['短剧名称']).toLowerCase();
-                const actor = drama['主演'] ? decrypt(drama['主演']).toLowerCase() : '';
-                const desc = drama['简介'] ? decrypt(drama['简介']).toLowerCase() : '';
-                
-                return name.includes(searchTerm) || 
-                       actor.includes(searchTerm) || 
-                       desc.includes(searchTerm);
-            } catch(e) {
-                return false;
-            }
-        });
-    }
-
-    // 显示搜索结果
-    function displayResults(results) {
-        const searchResultsList = document.getElementById('searchResultsList');
-        searchResultsList.innerHTML = '';
-
-        results.forEach(drama => {
-            try {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
-                resultItem.innerHTML = `
-                    <div class="result-title">${decrypt(drama['短剧名称'])}</div>
-                    <a href="${decrypt(drama['短剧链接'])}" class="result-link" target="_blank">观看链接</a>
-                `;
-                searchResultsList.appendChild(resultItem);
-            } catch(e) {
-                console.error('显示结果出错');
-            }
-        });
-
-        showModal(searchResultsModal);
-    }
-
-    // 搜索表单提交事件
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        
-        if (!searchTerm) return;
-        
-        loading.style.display = 'flex';
-
-        setTimeout(() => {
-            const results = search(searchTerm);
-            loading.style.display = 'none';
-            
-            if (results.length > 0) {
-                displayResults(results);
-            } else {
-                showModal(noResultsModal);
-            }
-        }, 1000);
-    });
-
-    // 页面加载完成后初始化
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(hideContactButton, 60000);
-    });
-
-    // 防止iOS橡皮筋效果和双击缩放
-    document.addEventListener('touchmove', function(e) {
-        if (!e.target.closest('.modal-body')) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(e) {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
-</script>
+    <!-- JavaScript文件 -->
+    <script src="js/search.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

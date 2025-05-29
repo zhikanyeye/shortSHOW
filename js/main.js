@@ -1,14 +1,5 @@
-/**
- * shortSHOW 主功能模块
- * 处理UI交互、事件监听、模态框管理等核心功能
- * 
- * @author Luxcus Qing
- * @version 1.0
- * @updated 2025-05-29
- */
-
-document.addEventListener('DOMContentLoaded', () => {
-    // 全局变量和元素引用
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
     const searchSuggestions = document.getElementById('searchSuggestions');
@@ -29,9 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 上次搜索关键词
     let lastSearchQuery = '';
     
+    // 全局定时器
+    window.searchTimer = null;
+    
     // 设置最后更新日期
     if (lastUpdateElement) {
-        lastUpdateElement.textContent = '2025-05-29';
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        lastUpdateElement.textContent = `${year}-${month}-${day}`;
     }
     
     // 初始化功能
@@ -50,10 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('input', handleSearchInput);
         searchInput.addEventListener('focus', showSuggestions);
         searchInput.addEventListener('blur', () => {
-            // 延迟隐藏推荐，以便可以点击
+            // 将延迟时间减少，避免与弹窗冲突
             setTimeout(() => {
                 hideSuggestions();
-            }, 200);
+            }, 100);
         });
         
         // 热门标签点击
@@ -75,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
-        // 点击模态框外部区域关闭
+        // 点击模态框外部区域关闭（修改此处避免弹窗自动消失）
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', event => {
                 if (event.target === modal) {
@@ -84,10 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
+        // 防止搜索结果弹窗中的点击事件冒泡到外层
+        if (searchResultsModal) {
+            const modalContent = searchResultsModal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+            }
+        }
+        
         // 联系按钮点击
-        contactButton.addEventListener('click', () => {
-            openModal(contactModal);
-        });
+        if (contactButton) {
+            contactButton.addEventListener('click', () => {
+                openModal(contactModal);
+            });
+        }
         
         // 键盘事件
         document.addEventListener('keydown', event => {
@@ -111,8 +121,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const query = forcedQuery || searchInput.value.trim();
         
-        // 防止重复搜索
+        // 防止重复搜索（修改逻辑，允许重复搜索仍然显示结果）
         if (query === lastSearchQuery) {
+            // 如果是重复搜索，仍然显示结果而不是直接返回
+            const existingResults = window.searchEngine.search(query);
+            if (existingResults && existingResults.length > 0) {
+                const formattedResults = window.searchEngine.formatResults(existingResults);
+                displaySearchResults(formattedResults, query);
+            }
             return;
         }
         lastSearchQuery = query;
@@ -131,8 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // 增加搜索计数
         window.searchEngine.incrementSearchCount();
         
-        // 延迟执行搜索，让UI有时间更新
-        setTimeout(() => {
+        // 使用更稳定的定时器
+        clearTimeout(window.searchTimer);
+        window.searchTimer = setTimeout(() => {
             const results = window.searchEngine.search(query);
             
             if (results && results.length > 0) {
@@ -177,8 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * 隐藏搜索建议
      */
     function hideSuggestions() {
-        searchSuggestions.innerHTML = '';
-        searchSuggestions.classList.add('hidden');
+        if (searchSuggestions) {
+            searchSuggestions.innerHTML = '';
+            searchSuggestions.classList.add('hidden');
+        }
     }
     
     /**
@@ -211,6 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} query - 搜索关键词
      */
     function displaySearchResults(results, query) {
+        if (!searchResultsList || !resultsTitle) return;
+        
         searchResultsList.innerHTML = '';
         resultsTitle.textContent = `"${query}" 的搜索结果 (${results.length})`;
         
@@ -272,29 +293,45 @@ document.addEventListener('DOMContentLoaded', () => {
      * 显示无结果界面
      */
     function showNoResults() {
-        openModal(noResultsModal);
+        if (noResultsModal) {
+            openModal(noResultsModal);
+        }
     }
     
     /**
-     * 打开模态框
+     * 打开模态框 - 修改版本
      * @param {Element} modal - 模态框元素
      */
     function openModal(modal) {
-        closeAllModals();
-        setTimeout(() => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
+        if (!modal) return;
+        
+        // 先关闭其他所有弹窗
+        document.querySelectorAll('.modal.show').forEach(m => {
+            if (m !== modal) {
+                m.classList.remove('show');
+                m.classList.add('hidden');
+            }
+        });
+        
+        // 延时打开目标弹窗，避免动画冲突
+        modal.classList.remove('hidden');
+        // 使用requestAnimationFrame确保DOM更新后再添加动画类
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
                 modal.classList.add('show');
-            }, 10);
-        }, 100);
+            });
+        });
     }
     
     /**
-     * 关闭模态框
+     * 关闭模态框 - 修改版本
      * @param {Element} modal - 模态框元素
      */
     function closeModal(modal) {
+        if (!modal) return;
+        
         modal.classList.remove('show');
+        // 使用较长的延迟以匹配CSS过渡时间
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 300);
@@ -305,7 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function closeAllModals() {
         document.querySelectorAll('.modal').forEach(modal => {
-            closeModal(modal);
+            modal.classList.remove('show');
+            modal.classList.add('hidden');
         });
     }
     
@@ -313,14 +351,18 @@ document.addEventListener('DOMContentLoaded', () => {
      * 显示加载动画
      */
     function showLoading() {
-        loadingElement.classList.remove('hidden');
+        if (loadingElement) {
+            loadingElement.classList.remove('hidden');
+        }
     }
     
     /**
      * 隐藏加载动画
      */
     function hideLoading() {
-        loadingElement.classList.add('hidden');
+        if (loadingElement) {
+            loadingElement.classList.add('hidden');
+        }
     }
     
     /**
@@ -347,17 +389,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
-     * 初始化回到顶部按钮
+     * 初始化返回顶部按钮
      */
     function initScrollToTopButton() {
+        if (!backToTopBtn) return;
+        
+        // 监听滚动事件
         window.addEventListener('scroll', () => {
             if (window.scrollY > 300) {
-                backToTopBtn.classList.remove('hidden');
+                backToTopBtn.classList.add('show');
             } else {
-                backToTopBtn.classList.add('hidden');
+                backToTopBtn.classList.remove('show');
             }
         });
         
+        // 点击事件
         backToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
@@ -367,161 +413,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     /**
+     * 显示提示信息
+     * @param {string} message - 提示消息
+     */
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // 强制重绘
+        void toast.offsetWidth;
+        
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+    
+    /**
      * 截断文本
      * @param {string} text - 原始文本
      * @param {number} maxLength - 最大长度
      * @returns {string} 截断后的文本
      */
     function truncateText(text, maxLength) {
-        if (text.length <= maxLength) return text;
+        if (!text || text.length <= maxLength) {
+            return text;
+        }
         return text.substring(0, maxLength) + '...';
     }
     
     /**
-     * 显示提示消息
-     * @param {string} message - 提示消息
-     * @param {string} type - 消息类型（success, error, info）
-     */
-    function showToast(message, type = 'info') {
-        // 检查是否已存在Toast元素
-        let toast = document.querySelector('.toast-notification');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.className = 'toast-notification hidden';
-            document.body.appendChild(toast);
-        }
-        
-        // 设置类型和消息
-        toast.className = `toast-notification toast-${type} hidden`;
-        toast.textContent = message;
-        
-        // 显示动画
-        setTimeout(() => {
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 3000);
-        }, 10);
-    }
-    
-    /**
-     * 跟踪观看点击
-     * @param {string} title - 短剧标题
+     * 记录观看点击
+     * @param {string} title - 剧名
      */
     function trackWatchClick(title) {
-        try {
-            // 记录本地历史
-            const watchHistory = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-            
-            // 移除重复项
-            const filteredHistory = watchHistory.filter(item => item.title !== title);
-            
-            // 添加到开头
-            filteredHistory.unshift({
-                title: title,
-                timestamp: new Date().toISOString()
-            });
-            
-            // 限制历史记录数量
-            const limitedHistory = filteredHistory.slice(0, 50);
-            
-            // 保存到本地存储
-            localStorage.setItem('watchHistory', JSON.stringify(limitedHistory));
-            
-        } catch (error) {
-            console.warn('保存观看历史失败:', error);
-        }
+        // 这里可以添加统计代码
+        console.log('用户点击了观看:', title);
     }
-    
-    /**
-     * 获取观看历史
-     * @returns {Array} 观看历史记录
-     */
-    function getWatchHistory() {
-        try {
-            return JSON.parse(localStorage.getItem('watchHistory') || '[]');
-        } catch (error) {
-            console.warn('获取观看历史失败:', error);
-            return [];
-        }
-    }
-    
-    /**
-     * 清除观看历史
-     */
-    function clearWatchHistory() {
-        try {
-            localStorage.removeItem('watchHistory');
-        } catch (error) {
-            console.warn('清除观看历史失败:', error);
-        }
-    }
-    
-    // 导出公共API
-    window.appUI = {
-        openModal,
-        closeModal,
-        showToast,
-        getWatchHistory,
-        clearWatchHistory
-    };
 });
-
-// 添加自定义CSS样式
-(function addToastStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .toast-notification {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            opacity: 1;
-            transition: all 0.3s ease;
-            max-width: 80vw;
-            text-align: center;
-        }
-        
-        .toast-notification.hidden {
-            opacity: 0;
-            transform: translate(-50%, 20px);
-            pointer-events: none;
-        }
-        
-        .toast-success {
-            background-color: #48bb78;
-        }
-        
-        .toast-error {
-            background-color: #f56565;
-        }
-        
-        .toast-info {
-            background-color: #4299e1;
-        }
-    `;
-    document.head.appendChild(style);
-})();
-
-// 添加网站性能追踪
-(function initPerformanceTracking() {
-    // 记录页面加载时间
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const perfData = window.performance.timing;
-            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-            console.log(`页面加载时间: ${pageLoadTime}ms`);
-            
-            // 可以在这里实现发送到分析服务
-        }, 0);
-    });
-})();

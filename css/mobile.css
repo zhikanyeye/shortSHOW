@@ -1,0 +1,246 @@
+/* 移动端优化样式 */
+@media screen and (max-width: 768px) {
+    /* 基础布局调整 */
+    .header {
+        padding: 2rem 1rem 1.5rem;
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    /* 搜索区域优化 */
+    .search-form {
+        padding: 1.25rem;
+    }
+    
+    .search-input-wrapper {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .search-input {
+        font-size: 16px; /* 防止iOS缩放 */
+        padding: 1rem;
+    }
+    
+    .search-button {
+        justify-content: center;
+        padding: 1rem;
+    }
+    
+    /* 热门搜索调整 */
+    .hot-tags {
+        gap: 0.4rem;
+    }
+    
+    .hot-tag {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.8rem;
+    }
+    
+    /* 统计信息调整 */
+    .stats-container {
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-item {
+        padding: 0.75rem;
+        min-width: 80px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    /* 模态框优化 */
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+        margin: 1rem;
+    }
+    
+    .modal-header {
+        padding: 1.25rem;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 1.25rem;
+    }
+    
+    /* 搜索结果优化 */
+    .result-item {
+        padding: 1rem;
+    }
+    
+    .result-title {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+    
+    .result-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .result-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    /* 联系内容优化 */
+    .contact-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+        padding: 1rem 0;
+    }
+    
+    .contact-icon {
+        font-size: 1.5rem;
+    }
+    
+    /* 悬浮按钮调整 */
+    .floating-buttons {
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+    
+    .floating-btn {
+        padding: 0.6rem 0.8rem;
+    }
+    
+    .btn-text {
+        font-size: 0.85rem;
+    }
+    
+    .back-to-top {
+        width: 44px;
+        height: 44px;
+    }
+    
+    /* 页脚调整 */
+    .footer {
+        padding: 1.5rem 1rem;
+    }
+    
+    .footer p {
+        font-size: 0.8rem;
+    }
+}
+
+/* 小屏幕设备进一步优化 */
+@media screen and (max-width: 480px) {
+    .title {
+        font-size: 1.8rem;
+    }
+    
+    .search-form {
+        padding: 1rem;
+    }
+    
+    .stats-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .stat-item {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .floating-buttons {
+        bottom: 1rem;
+        right: 1rem;
+    }
+    
+    .floating-btn {
+        padding: 0.5rem 0.7rem;
+    }
+    
+    .btn-text {
+        display: none;
+    }
+    
+    .contact-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        justify-content: center;
+        padding: 0;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .search-button:hover,
+    .hot-tag:hover,
+    .result-item:hover,
+    .result-link:hover,
+    .floating-btn:hover {
+        transform: none;
+    }
+    
+    .search-button:active,
+    .hot-tag:active,
+    .result-link:active,
+    .floating-btn:active {
+        transform: scale(0.98);
+    }
+    
+    /* 增大触摸目标 */
+    .hot-tag,
+    .modal-close,
+    .result-link {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* 横屏模式优化 */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+    .header {
+        padding: 1rem;
+    }
+    
+    .title {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .stats-container {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .modal-content {
+        max-height: 95vh;
+    }
+}
+
+/* 高分辨率屏幕优化 */
+@media screen and (min-resolution: 2dppx) {
+    .search-input,
+    .search-button,
+    .modal-content {
+        border-width: 0.5px;
+    }
+}

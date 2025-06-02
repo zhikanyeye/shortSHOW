@@ -1,0 +1,108 @@
+/* 移动端特定问题修复样式 */
+
+/* 防止iOS默认滚动回弹效果 */
+html {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 修复模态框显示问题 */
+.modal {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.modal-content {
+    -webkit-transform: translate3d(0,0,0); /* 解决GPU渲染问题 */
+    transform: translate3d(0,0,0);
+}
+
+/* 增强触摸区域 */
+.hot-tag, 
+.search-button, 
+.modal-close,
+.floating-btn,
+.result-link {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation; /* 优化触摸行为 */
+}
+
+/* 防止iOS输入框缩放 */
+input[type="search"],
+input[type="text"] {
+    font-size: 16px !important; /* 确保iOS不会自动缩放 */
+    -webkit-appearance: none; /* 移除iOS默认样式 */
+    appearance: none;
+    border-radius: 0; /* 移除iOS的圆角 */
+}
+
+/* 修复iOS上固定定位元素的问题 */
+.floating-buttons {
+    -webkit-transform: translateZ(0); /* 强制GPU渲染 */
+    transform: translateZ(0);
+}
+
+/* 增强点击反馈 */
+.hot-tag:active,
+.search-button:active,
+.floating-btn:active,
+.result-link:active {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(0.97);
+}
+
+/* 修复搜索建议的层叠问题 */
+.search-suggestions {
+    z-index: 100;
+    -webkit-transform: translateZ(0); /* 强制GPU渲染 */
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.suggestion-item {
+    min-height: 44px; /* 符合触摸标准 */
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* 修复iOS上模态框滚动问题 */
+.modal.show .modal-content {
+    max-height: 85vh; /* 确保在iOS上可滚动 */
+    overflow-y: auto;
+}
+
+/* 增强滚动体验 */
+.modal-body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* 优化触摸设备上的悬浮按钮 */
+@media (hover: none) {
+    .floating-buttons {
+        bottom: 20px; /* 确保不被iOS底部工具栏遮挡 */
+    }
+}
+
+/* 修复toast提示 */
+.toast {
+    z-index: 10000;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    width: 80%;
+    max-width: 300px;
+    padding: 12px 15px;
+    border-radius: 8px;
+}

@@ -9,6 +9,7 @@ class SearchEngine {
         this.searchCache = new Map();
         this.searchHistory = this.loadSearchHistory();
         this.isLoading = false;
+        this.dataLoadAttempts = 0; // 添加数据加载尝试次数计数
         
         // 初始化
         this.init();
@@ -24,7 +25,15 @@ class SearchEngine {
             console.log('搜索引擎初始化完成');
         } catch (error) {
             console.error('搜索引擎初始化失败:', error);
-            this.showError('数据加载失败，请刷新页面重试');
+            
+            // 添加重试逻辑
+            if (this.dataLoadAttempts < 3) {
+                this.dataLoadAttempts++;
+                console.log(`尝试重新加载数据（${this.dataLoadAttempts}/3）...`);
+                setTimeout(() => this.init(), 1000);
+            } else {
+                this.showError('数据加载失败，请刷新页面重试');
+            }
         }
     }
 
@@ -33,7 +42,17 @@ class SearchEngine {
      */
     async loadDramas() {
         try {
-            const response = await fetch('data/dramas.json?' + Date.now());
+            // 添加随机数防止缓存，并设置超时
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const response = await fetch('data/dramas.json?' + Date.now(), {
+                signal: controller.signal,
+                cache: 'no-store' // 禁止缓存
+            });
+            
+            clearTimeout(timeoutId);
+            
             if (!response.ok) {
                 throw new Error(`HTTP错误: ${response.status}`);
             }
@@ -43,7 +62,7 @@ class SearchEngine {
             // 处理数据格式
             if (Array.isArray(data)) {
                 this.dramas = data;
-            } else if (data.dramas) {
+            } else if (data.dramas && Array.isArray(data.dramas)) {
                 this.dramas = data.dramas;
             } else {
                 throw new Error('数据格式错误');
@@ -52,6 +71,10 @@ class SearchEngine {
             console.log(`成功加载 ${this.dramas.length} 部短剧数据`);
             
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.error('加载数据超时');
+                throw new Error('加载数据超时，请检查网络连接');
+            }
             console.error('加载数据失败:', error);
             throw error;
         }
@@ -67,6 +90,12 @@ class SearchEngine {
             return [];
         }
 
+        // 检查数据是否已加载
+        if (!this.dramas || this.dramas.length === 0) {
+            console.warn('搜索前数据尚未加载完成');
+            throw new Error('数据尚未准备好，请稍后再试');
+        }
+
         const searchKey = query.toLowerCase().trim();
         
         // 检查缓存
@@ -77,32 +106,37 @@ class SearchEngine {
 
         console.log(`搜索关键词: "${searchKey}"`);
         
-        const results = this.dramas.filter(drama => {
-            try {
-                // 解密数据进行搜索
-                const title = this.decrypt(drama['短剧名称'] || '').toLowerCase();
-                const actors = this.decrypt(drama['主演'] || '').toLowerCase();
-                const description = this.decrypt(drama['简介'] || '').toLowerCase();
-                
-                // 多字段搜索
-                return title.includes(searchKey) || 
-                       actors.includes(searchKey) || 
-                       description.includes(searchKey);
-                       
-            } catch (error) {
-                console.warn('搜索时解密失败:', error);
-                return false;
-            }
-        });
+        try {
+            const results = this.dramas.filter(drama => {
+                try {
+                    // 解密数据进行搜索
+                    const title = this.decrypt(drama['短剧名称'] || '').toLowerCase();
+                    const actors = this.decrypt(drama['主演'] || '').toLowerCase();
+                    const description = this.decrypt(drama['简介'] || '').toLowerCase();
+                    
+                    // 多字段搜索
+                    return title.includes(searchKey) || 
+                          actors.includes(searchKey) || 
+                          description.includes(searchKey);
+                          
+                } catch (error) {
+                    console.warn('搜索时解密失败:', error);
+                    return false;
+                }
+            });
 
-        // 缓存结果
-        this.searchCache.set(searchKey, results);
-        
-        // 保存搜索历史
-        this.saveSearchHistory(query);
-        
-        console.log(`找到 ${results.length} 个结果`);
-        return results;
+            // 缓存结果
+            this.searchCache.set(searchKey, results);
+            
+            // 保存搜索历史
+            this.saveSearchHistory(query);
+            
+            console.log(`找到 ${results.length} 个结果`);
+            return results;
+        } catch (error) {
+            console.error('搜索执行出错:', error);
+            throw error;
+        }
     }
 
     /**
@@ -111,36 +145,41 @@ class SearchEngine {
      * @returns {Array} 建议列表
      */
     getSuggestions(query) {
-        if (!query || query.length < 1) {
+        if (!query || query.length < 1 || !this.dramas || this.dramas.length === 0) {
             return [];
         }
 
-        const searchKey = query.toLowerCase();
-        const suggestions = new Set();
-        
-        // 从短剧标题中提取建议
-        this.dramas.forEach(drama => {
-            try {
-                const title = this.decrypt(drama['短剧名称'] || '');
-                if (title.toLowerCase().includes(searchKey)) {
-                    suggestions.add(title);
+        try {
+            const searchKey = query.toLowerCase();
+            const suggestions = new Set();
+            
+            // 从短剧标题中提取建议
+            this.dramas.forEach(drama => {
+                try {
+                    const title = this.decrypt(drama['短剧名称'] || '');
+                    if (title.toLowerCase().includes(searchKey)) {
+                        suggestions.add(title);
+                    }
+                    
+                    // 从演员名中提取建议
+                    const actors = this.decrypt(drama['主演'] || '');
+                    if (actors.toLowerCase().includes(searchKey)) {
+                        actors.split(/[,，\s]+/).forEach(actor => {
+                            if (actor.toLowerCase().includes(searchKey)) {
+                                suggestions.add(actor.trim());
+                            }
+                        });
+                    }
+                } catch (error) {
+                    // 忽略解密错误
                 }
-                
-                // 从演员名中提取建议
-                const actors = this.decrypt(drama['主演'] || '');
-                if (actors.toLowerCase().includes(searchKey)) {
-                    actors.split(/[,，\s]+/).forEach(actor => {
-                        if (actor.toLowerCase().includes(searchKey)) {
-                            suggestions.add(actor.trim());
-                        }
-                    });
-                }
-            } catch (error) {
-                // 忽略解密错误
-            }
-        });
+            });
 
-        return Array.from(suggestions).slice(0, 5);
+            return Array.from(suggestions).slice(0, 5);
+        } catch (error) {
+            console.error('获取建议时出错:', error);
+            return [];
+        }
     }
 
     /**
@@ -149,21 +188,26 @@ class SearchEngine {
      * @returns {Array} 格式化后的结果
      */
     formatResults(results) {
-        return results.map(drama => {
-            try {
-                return {
-                    title: this.decrypt(drama['短剧名称'] || ''),
-                    link: this.decrypt(drama['短剧链接'] || ''),
-                    actors: this.decrypt(drama['主演'] || ''),
-                    description: this.decrypt(drama['简介'] || ''),
-                    episodes: drama['集数'] || '',
-                    category: drama['类型'] || ''
-                };
-            } catch (error) {
-                console.warn('格式化结果时出错:', error);
-                return null;
-            }
-        }).filter(item => item !== null);
+        try {
+            return results.map(drama => {
+                try {
+                    return {
+                        title: this.decrypt(drama['短剧名称'] || ''),
+                        link: this.decrypt(drama['短剧链接'] || ''),
+                        actors: this.decrypt(drama['主演'] || ''),
+                        description: this.decrypt(drama['简介'] || ''),
+                        episodes: drama['集数'] || '',
+                        category: drama['类型'] || ''
+                    };
+                } catch (error) {
+                    console.warn('格式化结果时出错:', error);
+                    return null;
+                }
+            }).filter(item => item !== null);
+        } catch (error) {
+            console.error('格式化结果列表时出错:', error);
+            return [];
+        }
     }
 
     /**
@@ -335,9 +379,34 @@ class SearchEngine {
      * @param {string} message - 错误信息
      */
     showError(message) {
-        // 可以在这里实现错误提示UI
         console.error(message);
-        alert(message); // 临时使用alert，可以替换为更好的UI
+        
+        // 创建一个更美观的错误提示，取代alert
+        const errorToast = document.createElement('div');
+        errorToast.style.position = 'fixed';
+        errorToast.style.top = '20%';
+        errorToast.style.left = '50%';
+        errorToast.style.transform = 'translateX(-50%)';
+        errorToast.style.background = 'rgba(220, 53, 69, 0.95)';
+        errorToast.style.color = 'white';
+        errorToast.style.padding = '1rem 1.5rem';
+        errorToast.style.borderRadius = '8px';
+        errorToast.style.maxWidth = '90%';
+        errorToast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+        errorToast.style.zIndex = '10000';
+        errorToast.style.textAlign = 'center';
+        errorToast.style.fontSize = '1rem';
+        errorToast.textContent = message;
+        
+        document.body.appendChild(errorToast);
+        
+        setTimeout(() => {
+            errorToast.style.opacity = '0';
+            errorToast.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.removeChild(errorToast);
+            }, 500);
+        }, 4000);
     }
 
     /**

@@ -42,38 +42,55 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function initEventListeners() {
         // 搜索表单提交
-        searchForm.addEventListener('submit', handleSearch);
+        searchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            handleSearch(event);
+        });
         
         // 搜索输入框事件
         searchInput.addEventListener('input', handleSearchInput);
         searchInput.addEventListener('focus', showSuggestions);
+        
+        // 修改blur事件，延长延迟时间，避免与点击冲突
         searchInput.addEventListener('blur', () => {
-            // 将延迟时间减少，避免与弹窗冲突
+            // 延长延迟时间至200ms，给点击事件足够的时间触发
             setTimeout(() => {
                 hideSuggestions();
-            }, 100);
+            }, 200);
         });
         
-        // 热门标签点击
+        // 热门标签点击 - 添加防止默认行为
         hotTags.forEach(tag => {
-            tag.addEventListener('click', () => {
+            tag.addEventListener('click', (e) => {
+                e.preventDefault(); // 防止默认行为
                 const searchText = tag.getAttribute('data-search');
                 if (searchText) {
                     searchInput.value = searchText;
                     handleSearch(null, searchText);
                 }
             });
+            
+            // 为移动设备添加touchend事件
+            tag.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const searchText = tag.getAttribute('data-search');
+                if (searchText) {
+                    searchInput.value = searchText;
+                    handleSearch(null, searchText);
+                }
+            }, { passive: false });
         });
         
         // 关闭按钮点击
         closeButtons.forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
                 const modal = button.closest('.modal');
                 closeModal(modal);
             });
         });
         
-        // 点击模态框外部区域关闭（修改此处避免弹窗自动消失）
+        // 点击模态框外部区域关闭
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', event => {
                 if (event.target === modal) {
@@ -94,9 +111,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 联系按钮点击
         if (contactButton) {
-            contactButton.addEventListener('click', () => {
+            contactButton.addEventListener('click', (e) => {
+                e.preventDefault();
                 openModal(contactModal);
             });
+            
+            // 为移动设备添加touchend事件
+            contactButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                openModal(contactModal);
+            }, { passive: false });
         }
         
         // 键盘事件
@@ -150,18 +174,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // 使用更稳定的定时器
         clearTimeout(window.searchTimer);
         window.searchTimer = setTimeout(() => {
-            const results = window.searchEngine.search(query);
-            
-            if (results && results.length > 0) {
-                const formattedResults = window.searchEngine.formatResults(results);
-                displaySearchResults(formattedResults, query);
-            } else {
-                showNoResults();
+            try {
+                const results = window.searchEngine.search(query);
+                
+                if (results && results.length > 0) {
+                    const formattedResults = window.searchEngine.formatResults(results);
+                    displaySearchResults(formattedResults, query);
+                } else {
+                    showNoResults();
+                }
+            } catch (error) {
+                console.error('搜索执行失败:', error);
+                showToast('搜索失败，请重试');
+            } finally {
+                // 隐藏加载动画
+                hideLoading();
             }
-            
-            // 隐藏加载动画
-            hideLoading();
-            
         }, 500);
     }
     
@@ -172,10 +200,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const query = searchInput.value.trim();
         
         if (query.length >= 1) {
-            const suggestions = window.searchEngine.getSuggestions(query);
-            if (suggestions.length > 0) {
-                displaySuggestions(suggestions);
-            } else {
+            try {
+                const suggestions = window.searchEngine.getSuggestions(query);
+                if (suggestions.length > 0) {
+                    displaySuggestions(suggestions);
+                } else {
+                    hideSuggestions();
+                }
+            } catch (error) {
+                console.error('获取搜索建议失败:', error);
                 hideSuggestions();
             }
         } else {
@@ -201,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * 显示搜索建议列表
+     * 显示搜索建议列表 - 修改版本，优化移动端触摸事件
      * @param {Array} suggestions - 建议列表
      */
     function displaySuggestions(suggestions) {
@@ -212,7 +245,20 @@ document.addEventListener('DOMContentLoaded', function() {
             item.className = 'suggestion-item';
             item.textContent = suggestion;
             
-            item.addEventListener('click', () => {
+            // 使用touchstart事件，确保在移动设备上能够正常工作
+            item.addEventListener('touchstart', (e) => {
+                // 阻止默认事件，防止blur导致建议消失
+                e.preventDefault();
+                e.stopPropagation();
+                searchInput.value = suggestion;
+                hideSuggestions();
+                handleSearch(null, suggestion);
+            }, { passive: false });
+            
+            // 保留点击事件，用于桌面设备
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 searchInput.value = suggestion;
                 hideSuggestions();
                 handleSearch(null, suggestion);
@@ -299,11 +345,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     /**
-     * 打开模态框 - 修改版本
+     * 打开模态框 - 优化版本
      * @param {Element} modal - 模态框元素
      */
     function openModal(modal) {
         if (!modal) return;
+        
+        // 禁止背景滚动，避免移动端滚动问题
+        document.body.style.overflow = 'hidden';
         
         // 先关闭其他所有弹窗
         document.querySelectorAll('.modal.show').forEach(m => {
@@ -313,28 +362,42 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // 延时打开目标弹窗，避免动画冲突
+        // 立即移除隐藏类
         modal.classList.remove('hidden');
-        // 使用requestAnimationFrame确保DOM更新后再添加动画类
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                modal.classList.add('show');
-            });
-        });
+        
+        // 强制重绘
+        void modal.offsetWidth;
+        
+        // 添加显示类
+        modal.classList.add('show');
     }
     
     /**
-     * 关闭模态框 - 修改版本
+     * 关闭模态框 - 优化版本
      * @param {Element} modal - 模态框元素
      */
     function closeModal(modal) {
         if (!modal) return;
         
+        // 恢复背景滚动
+        document.body.style.overflow = '';
+        
         modal.classList.remove('show');
-        // 使用较长的延迟以匹配CSS过渡时间
-        setTimeout(() => {
+        
+        // 使用 transitionend 事件监听器确保过渡完成后再隐藏
+        const handleTransitionEnd = () => {
             modal.classList.add('hidden');
-        }, 300);
+            modal.removeEventListener('transitionend', handleTransitionEnd);
+        };
+        
+        modal.addEventListener('transitionend', handleTransitionEnd);
+        
+        // 设置备用超时，以防事件不触发
+        setTimeout(() => {
+            if (!modal.classList.contains('hidden')) {
+                modal.classList.add('hidden');
+            }
+        }, 400); // 稍微长一点的超时时间
     }
     
     /**
@@ -345,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.classList.remove('show');
             modal.classList.add('hidden');
         });
+        document.body.style.overflow = ''; // 恢复背景滚动
     }
     
     /**
@@ -370,21 +434,29 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {string} query - 搜索关键词
      */
     function updateUrlWithQuery(query) {
-        const url = new URL(window.location);
-        url.searchParams.set('q', query);
-        window.history.pushState({}, '', url);
+        try {
+            const url = new URL(window.location);
+            url.searchParams.set('q', query);
+            window.history.pushState({}, '', url);
+        } catch (error) {
+            console.error('更新URL参数失败:', error);
+        }
     }
     
     /**
      * 检查URL中是否包含搜索参数
      */
     function checkForDeepLink() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const query = urlParams.get('q');
-        
-        if (query) {
-            searchInput.value = query;
-            handleSearch(null, query);
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            
+            if (query) {
+                searchInput.value = query;
+                handleSearch(null, query);
+            }
+        } catch (error) {
+            console.error('检查URL参数失败:', error);
         }
     }
     
@@ -404,12 +476,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // 点击事件
-        backToTopBtn.addEventListener('click', () => {
+        backToTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
         });
+        
+        // 触摸事件
+        backToTopBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }, { passive: false });
     }
     
     /**
